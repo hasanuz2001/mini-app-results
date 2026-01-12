@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Resistance Survey – Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>📊 AI Resistance Survey Dashboard</h1>
+    <p class="subtitle">
+      Uran qazib olishda Sun’iy Intellekt joriy etilishi bo‘yicha ichki qarshilik tahlili
+    </p>
+
+    <div class="card">
+      <h2>📅 Bugungi natijalar</h2>
+      <p><strong>Bugun testdan o‘tganlar soni:</strong>
+        <span id="count">0</span>
+      </p>
+    </div>
+
+    <div class="grid">
+      <div class="card metric">
+        <h3>Leadership Resistance</h3>
+        <div class="score" id="leadership">0</div>
+        <p class="desc">
+          Rahbariyat, kommunikatsiya va ishtirok bilan bog‘liq qarshilik
+        </p>
+      </div>
+
+      <div class="card metric">
+        <h3>Core Resistance</h3>
+        <div class="score" id="core">0</div>
+        <p class="desc">
+          Qo‘rquv, javobgarlik va psixologik qarshilik
+        </p>
+      </div>
+
+      <div class="card metric">
+        <h3>Readiness Resistance</h3>
+        <div class="score" id="readiness">0</div>
+        <p class="desc">
+          Trening va raqamli tayyorlik bilan bog‘liq muammolar
+        </p>
+      </div>
+    </div>
+
+    <div class="note">
+      <p>
+        <strong>Izoh:</strong> Ballar yig‘indi ko‘rinishida berilgan.
+        Yuqori ball — qarshilik darajasi yuqori ekanini anglatadi.
+      </p>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
