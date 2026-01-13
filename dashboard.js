@@ -1,5 +1,6 @@
 // API bazasi manzili (localhost yoki production)
-const API_BASE = "http://localhost:8000";
+// Agar GitHub Pages-da ishlamoqchi bo'lsa, bu URL bilan server ishga tushirilishi kerak
+const API_BASE = window.location.hostname === 'localhost' ? "http://localhost:8000" : "/api";
 
 let allResponses = [];
 let allStats = {};
@@ -35,16 +36,49 @@ async function loadData() {
     updateLastUpdate();
   } catch (error) {
     console.error("API xatosi:", error);
-    document.getElementById("questionsStats").innerHTML = `<p style="color: red;">Xato: ${error.message}</p>`;
-    document.getElementById("responsesList").innerHTML = `<p style="color: red;">Xato: ${error.message}</p>`;
+    console.log("localStorage dan ma'lumot yuklash...");
+    
     // Agar API ishlamasa, localStorage dan o'qiylik
     loadFromLocalStorage();
+    
+    // Xato xabarini ko'rsatish
+    const message = `⚠️ Backend API bog'lanish xatosi.<br>
+    Ma'lumotlar localStorage dan yuklandi.<br>
+    <br>
+    <strong>Backend-ni ishga tushirish uchun:</strong><br>
+    <code style="background: #f0f0f0; padding: 10px; display: block; margin: 10px 0; border-radius: 5px; font-family: monospace;">
+    cd /Users/hasanhaydarov/hello_app/diploma_app/mini-app<br>
+    python3 -m uvicorn backend:app --reload --host 0.0.0.0 --port 8000
+    </code>`;
+    
+    document.getElementById("questionsStats").innerHTML = `<p style="color: #d32f2f; padding: 15px; background: #ffebee; border-radius: 5px;">${message}</p>`;
   }
 }
 
 // LocalStorage dan o'qish (backup)
 function loadFromLocalStorage() {
   const data = JSON.parse(localStorage.getItem("survey_results") || "{}");
+  
+  if (Object.keys(data).length === 0) {
+    document.getElementById("totalCount").innerText = "0";
+    document.getElementById("totalResponses").innerText = "0";
+    document.getElementById("questionsStats").innerHTML = `
+      <p style="color: #666; padding: 20px; text-align: center; background: #f5f5f5; border-radius: 5px;">
+        Hozircha javoblar yo'q.<br>
+        <br>
+        <strong style="color: #d32f2f;">Backend API ishlamayapti</strong><br>
+        <br>
+        Backend-ni ishga tushirish uchun terminal-da quyidagi buyruqni bajaring:
+        <br><br>
+        <code style="background: #fff3e0; padding: 15px; display: block; border-radius: 5px; font-family: monospace; border-left: 4px solid #ff9800; color: #333;">
+        cd /Users/hasanhaydarov/hello_app/diploma_app/mini-app<br>
+        python3 -m uvicorn backend:app --reload --host 0.0.0.0 --port 8000
+        </code>
+      </p>
+    `;
+    return;
+  }
+
   const today = new Date().toISOString().slice(0, 10);
   
   if (data[today]) {
