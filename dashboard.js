@@ -80,27 +80,42 @@ function displayQuestionStats() {
     return;
   }
 
-  const totalResponses = allResponses.length;
   let html = "";
   
-  Object.entries(stats).forEach(([qId, answers]) => {
+  // Savollarni sonli tartibi bilan saralab, ko'rsatish
+  const sortedQuestions = Object.keys(stats).sort((a, b) => parseInt(a) - parseInt(b));
+  
+  sortedQuestions.forEach((qId) => {
+    const answers = stats[qId];
+    const totalForQuestion = Object.values(answers).reduce((a, b) => a + b, 0);
+    
     html += `
-      <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-        <h4 style="margin-top: 0;">Savol #${qId}</h4>
-        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+      <div style="margin-bottom: 25px; padding: 20px; background: #f9f9f9; border-radius: 8px; border-left: 5px solid #2a9df4;">
+        <h4 style="margin: 0 0 15px 0; color: #333; font-size: 16px;">📋 Savol #${qId}</h4>
+        <div style="background: white; padding: 15px; border-radius: 6px;">
     `;
 
-    Object.entries(answers).forEach(([answer, count]) => {
-      const percentage = totalResponses > 0 ? ((count / totalResponses) * 100).toFixed(1) : 0;
-      html += `
-        <div style="flex: 1; min-width: 150px; padding: 10px; background: white; border-radius: 5px; border-left: 4px solid #2a9df4;">
-          <p style="margin: 0; font-weight: bold; color: #333;">${answer}</p>
-          <p style="margin: 0; color: #666;">
-            <strong>${count}</strong> ta (${percentage}%)
-          </p>
-        </div>
-      `;
-    });
+    // Javoblarni soni bo'yicha tartibi bilan ko'rsatish (eng ko'p tanlagan birinchi)
+    const sortedAnswers = Object.entries(answers)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([answer, count]) => {
+        const percentage = totalForQuestion > 0 ? ((count / totalForQuestion) * 100).toFixed(1) : 0;
+        const barWidth = percentage;
+        
+        html += `
+          <div style="margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+              <span style="font-weight: bold; color: #333; word-break: break-word; max-width: 70%;">${answer}</span>
+              <span style="color: #2a9df4; font-weight: bold;">${count} ta (${percentage}%)</span>
+            </div>
+            <div style="width: 100%; height: 25px; background: #e8f0f5; border-radius: 4px; overflow: hidden;">
+              <div style="width: ${barWidth}%; height: 100%; background: linear-gradient(90deg, #2a9df4, #1976d2); display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;">
+                ${barWidth > 15 ? `<span style="color: white; font-size: 12px; font-weight: bold;">${percentage}%</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
 
     html += `
         </div>
