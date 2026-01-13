@@ -155,13 +155,6 @@ function displayResponses() {
   list.innerHTML = html;
 }
 
-// Qidirish
-function filterResponses() {
-  const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-  // Qidirish logikasini qo'shish
-  console.log("Qidirish:", searchTerm);
-}
-
 // CSV yuklab olish
 function downloadCSV() {
   if (allResponses.length === 0) {
