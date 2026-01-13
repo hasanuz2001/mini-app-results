@@ -1,0 +1,179 @@
+// API bazasi manzili (localhost yoki production)
+const API_BASE = "http://localhost:8000";
+
+let allResponses = [];
+let allStats = {};
+
+// Ma'lumotlarni yuklash
+async function loadData() {
+  try {
+    // Statistika yuklash
+    const statsResponse = await fetch(`${API_BASE}/stats`);
+    const stats = await statsResponse.json();
+    allStats = stats;
+
+    // Barcha javoblarni yuklash
+    const responsesResponse = await fetch(`${API_BASE}/responses`);
+    const responses = await responsesResponse.json();
+    allResponses = responses.responses || [];
+
+    // Sahifani yangilash
+    updateDashboard();
+    updateLastUpdate();
+  } catch (error) {
+    console.error("API xatosi:", error);
+    // Agar API ishlamasa, localStorage dan o'qiylik
+    loadFromLocalStorage();
+  }
+}
+
+// LocalStorage dan o'qish (backup)
+function loadFromLocalStorage() {
+  const data = JSON.parse(localStorage.getItem("survey_results") || "{}");
+  const today = new Date().toISOString().slice(0, 10);
+  
+  if (data[today]) {
+    const d = data[today];
+    document.getElementById("totalCount").innerText = d.count || 0;
+    document.getElementById("totalResponses").innerText = (d.count * 14) || 0;
+  }
+}
+
+// Dashboard yangilash
+function updateDashboard() {
+  // Umumiy statistika
+  const totalCount = allStats.user_count || 0;
+  const totalResponses = allStats.total || 0;
+
+  document.getElementById("totalCount").innerText = totalCount;
+  document.getElementById("totalResponses").innerText = totalResponses;
+
+  // Savollar statistikasi
+  displayQuestionStats();
+
+  // Javoblarni ko'rsatish
+  displayResponses();
+}
+
+// Savollar bo'yicha statistika
+function displayQuestionStats() {
+  const statsDiv = document.getElementById("questionsStats");
+  const stats = allStats.question_stats || {};
+
+  if (Object.keys(stats).length === 0) {
+    statsDiv.innerHTML = '<p style="text-align: center; color: #999;">Javoblar yo\'q</p>';
+    return;
+  }
+
+  let html = "";
+  
+  Object.entries(stats).forEach(([qId, answers]) => {
+    html += `
+      <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+        <h4 style="margin-top: 0;">Savol #${qId}</h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+    `;
+
+    Object.entries(answers).forEach(([answer, count]) => {
+      const percentage = ((count / totalResponses) * 100).toFixed(1);
+      html += `
+        <div style="flex: 1; min-width: 150px; padding: 10px; background: white; border-radius: 5px; border-left: 4px solid #2a9df4;">
+          <p style="margin: 0; font-weight: bold; color: #333;">${answer}</p>
+          <p style="margin: 0; color: #666;">
+            <strong>${count}</strong> ta (${percentage}%)
+          </p>
+        </div>
+      `;
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+  });
+
+  statsDiv.innerHTML = html;
+}
+
+// Javoblarni ko'rsatish
+function displayResponses() {
+  const list = document.getElementById("responsesList");
+
+  if (allResponses.length === 0) {
+    list.innerHTML = '<p style="text-align: center; color: #999;">Javoblar yo\'q</p>';
+    return;
+  }
+
+  // Foydalanuvchilar bo'yicha yig'ish
+  const byUser = {};
+  allResponses.forEach(row => {
+    if (!byUser[row.user_id]) {
+      byUser[row.user_id] = {
+        user_id: row.user_id,
+        timestamp: row.timestamp,
+        answers: {}
+      };
+    }
+    byUser[row.user_id].answers[row.question_id] = row.answer;
+  });
+
+  let html = '<table style="width: 100%; border-collapse: collapse;">';
+  html += '<tr style="background: #2a9df4; color: white;">';
+  html += '<th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Sana</th>';
+  html += '<th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Foydalanuvchi ID</th>';
+  html += '<th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Javoblar</th>';
+  html += '</tr>';
+
+  Object.values(byUser).slice(-50).reverse().forEach((user, idx) => {
+    const bgColor = idx % 2 === 0 ? '#f9f9f9' : 'white';
+    const answerCount = Object.keys(user.answers).length;
+    
+    html += `<tr style="background: ${bgColor};">`;
+    html += `<td style="padding: 10px; border: 1px solid #ddd;">${new Date(user.timestamp).toLocaleString('uz-UZ')}</td>`;
+    html += `<td style="padding: 10px; border: 1px solid #ddd;">${user.user_id.substring(0, 8)}</td>`;
+    html += `<td style="padding: 10px; border: 1px solid #ddd;">${answerCount} ta</td>`;
+    html += '</tr>';
+  });
+
+  html += '</table>';
+  list.innerHTML = html;
+}
+
+// Qidirish
+function filterResponses() {
+  const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+  // Qidirish logikasini qo'shish
+  console.log("Qidirish:", searchTerm);
+}
+
+// CSV yuklab olish
+function downloadCSV() {
+  if (allResponses.length === 0) {
+    alert("Yuklab oladigan javoblar yo'q");
+    return;
+  }
+
+  let csv = "Sana,Foydalanuvchi ID,Savol ID,Javob\n";
+  
+  allResponses.forEach(row => {
+    csv += `"${row.timestamp}","${row.user_id}","${row.question_id}","${row.answer}"\n`;
+  });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `survey_results_${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+}
+
+// Yakungi yangilash vaqti
+function updateLastUpdate() {
+  const now = new Date().toLocaleString('uz-UZ');
+  document.getElementById("lastUpdate").innerText = now;
+}
+
+// Boshlang'ich yuklash
+loadData();
+
+// Har 5 soniyada yangilash
+setInterval(loadData, 5000);

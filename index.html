@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>AI Resistance Survey – Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,46 +12,52 @@
   <div class="container">
     <h1>📊 AI Resistance Survey Dashboard</h1>
     <p class="subtitle">
-      Uran qazib olishda Sun’iy Intellekt joriy etilishi bo‘yicha ichki qarshilik tahlili
+      Uran qazib olishda Sun'iy Intellekt joriy etilishi bo'yicha ichki qarshilik tahlili
     </p>
 
+    <!-- Umumiy Statistika -->
     <div class="card">
-      <h2>📅 Bugungi natijalar</h2>
-      <p><strong>Bugun testdan o‘tganlar soni:</strong>
-        <span id="count">0</span>
-      </p>
+      <h2>📅 Umumiy Natijalar</h2>
+      <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div>
+          <p><strong>Jami Ishtirokchilar:</strong></p>
+          <h3 id="totalCount" style="color: #2a9df4; font-size: 32px; margin: 0;">0</h3>
+        </div>
+        <div>
+          <p><strong>Jami Javoblar:</strong></p>
+          <h3 id="totalResponses" style="color: #2a9df4; font-size: 32px; margin: 0;">0</h3>
+        </div>
+        <div>
+          <p><strong>Yakungi Yangilash:</strong></p>
+          <p id="lastUpdate" style="margin: 0;">Yuklanmoqda...</p>
+        </div>
+      </div>
     </div>
 
-    <div class="grid">
-      <div class="card metric">
-        <h3>Leadership Resistance</h3>
-        <div class="score" id="leadership">0</div>
-        <p class="desc">
-          Rahbariyat, kommunikatsiya va ishtirok bilan bog‘liq qarshilik
-        </p>
+    <!-- Savollar Statistikasi -->
+    <div class="card">
+      <h2>📋 Savol Statistikasi</h2>
+      <div id="questionsStats" style="max-height: 500px; overflow-y: auto;">
+        <p style="text-align: center; color: #999;">Yuklanmoqda...</p>
       </div>
+    </div>
 
-      <div class="card metric">
-        <h3>Core Resistance</h3>
-        <div class="score" id="core">0</div>
-        <p class="desc">
-          Qo‘rquv, javobgarlik va psixologik qarshilik
-        </p>
+    <!-- Javoblar Ro'yxati -->
+    <div class="card">
+      <h2>💬 Barcha Javoblar</h2>
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <input type="text" id="searchInput" placeholder="Qidirish..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+        <button onclick="filterResponses()" style="padding: 10px 20px; background: #2a9df4; color: white; border: none; border-radius: 5px; cursor: pointer;">Qidirish</button>
+        <button onclick="downloadCSV()" style="padding: 10px 20px; background: #2e7d32; color: white; border: none; border-radius: 5px; cursor: pointer;">CSV Yuklab Olish</button>
       </div>
-
-      <div class="card metric">
-        <h3>Readiness Resistance</h3>
-        <div class="score" id="readiness">0</div>
-        <p class="desc">
-          Trening va raqamli tayyorlik bilan bog‘liq muammolar
-        </p>
+      <div id="responsesList" style="max-height: 600px; overflow-y: auto;">
+        <p style="text-align: center; color: #999;">Yuklanmoqda...</p>
       </div>
     </div>
 
     <div class="note">
       <p>
-        <strong>Izoh:</strong> Ballar yig‘indi ko‘rinishida berilgan.
-        Yuqori ball — qarshilik darajasi yuqori ekanini anglatadi.
+        <strong>Izoh:</strong> Dashboard har 5 soniyada avtomatik yangilanadi.
       </p>
     </div>
   </div>
