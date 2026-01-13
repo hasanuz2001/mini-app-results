@@ -8,20 +8,35 @@ let allStats = {};
 async function loadData() {
   try {
     // Statistika yuklash
+    console.log("API dan yuklash: " + API_BASE + "/stats");
     const statsResponse = await fetch(`${API_BASE}/stats`);
+    
+    if (!statsResponse.ok) {
+      throw new Error(`Stats API error: ${statsResponse.status}`);
+    }
+    
     const stats = await statsResponse.json();
     allStats = stats;
+    console.log("Stats yuklandi:", allStats);
 
     // Barcha javoblarni yuklash
     const responsesResponse = await fetch(`${API_BASE}/responses`);
+    
+    if (!responsesResponse.ok) {
+      throw new Error(`Responses API error: ${responsesResponse.status}`);
+    }
+    
     const responses = await responsesResponse.json();
     allResponses = responses.responses || [];
+    console.log("Responses yuklandi:", allResponses.length);
 
     // Sahifani yangilash
     updateDashboard();
     updateLastUpdate();
   } catch (error) {
     console.error("API xatosi:", error);
+    document.getElementById("questionsStats").innerHTML = `<p style="color: red;">Xato: ${error.message}</p>`;
+    document.getElementById("responsesList").innerHTML = `<p style="color: red;">Xato: ${error.message}</p>`;
     // Agar API ishlamasa, localStorage dan o'qiylik
     loadFromLocalStorage();
   }
@@ -65,6 +80,7 @@ function displayQuestionStats() {
     return;
   }
 
+  const totalResponses = allResponses.length;
   let html = "";
   
   Object.entries(stats).forEach(([qId, answers]) => {
@@ -75,7 +91,7 @@ function displayQuestionStats() {
     `;
 
     Object.entries(answers).forEach(([answer, count]) => {
-      const percentage = ((count / totalResponses) * 100).toFixed(1);
+      const percentage = totalResponses > 0 ? ((count / totalResponses) * 100).toFixed(1) : 0;
       html += `
         <div style="flex: 1; min-width: 150px; padding: 10px; background: white; border-radius: 5px; border-left: 4px solid #2a9df4;">
           <p style="margin: 0; font-weight: bold; color: #333;">${answer}</p>
