@@ -1,6 +1,9 @@
-// API bazasi manzili (localhost yoki production)
-// Agar GitHub Pages-da ishlamoqchi bo'lsa, bu URL bilan server ishga tushirilishi kerak
-const API_BASE = window.location.hostname === 'localhost' ? "http://localhost:8000" : "/api";
+// API bazasi manzili - config.js dan olinadi
+const API_BASE = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE) 
+  ? CONFIG.API_BASE
+  : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? "http://localhost:8000"
+      : "https://your-backend-url.com"); // Production backend URL'ni qo'ying
 
 let allResponses = [];
 let allStats = {};
@@ -36,57 +39,30 @@ async function loadData() {
     updateLastUpdate();
   } catch (error) {
     console.error("API xatosi:", error);
-    console.log("localStorage dan ma'lumot yuklash...");
-    
-    // Agar API ishlamasa, localStorage dan o'qiylik
-    loadFromLocalStorage();
     
     // Xato xabarini ko'rsatish
     const message = `⚠️ Backend API bog'lanish xatosi.<br>
-    Ma'lumotlar localStorage dan yuklandi.<br>
+    Ma'lumotlar faqat backend'dan olinadi.<br>
     <br>
     <strong>Backend-ni ishga tushirish uchun:</strong><br>
     <code style="background: #f0f0f0; padding: 10px; display: block; margin: 10px 0; border-radius: 5px; font-family: monospace;">
     cd /Users/hasanhaydarov/hello_app/diploma_app/mini-app<br>
     python3 -m uvicorn backend:app --reload --host 0.0.0.0 --port 8000
+    </code>
+    <br>
+    <strong>Yoki backend URL'ni tekshiring:</strong><br>
+    <code style="background: #fff3e0; padding: 10px; display: block; margin: 10px 0; border-radius: 5px; font-family: monospace;">
+    ${API_BASE}
     </code>`;
     
-    document.getElementById("questionsStats").innerHTML = `<p style="color: #d32f2f; padding: 15px; background: #ffebee; border-radius: 5px;">${message}</p>`;
-  }
-}
-
-// LocalStorage dan o'qish (backup)
-function loadFromLocalStorage() {
-  const data = JSON.parse(localStorage.getItem("survey_results") || "{}");
-  
-  if (Object.keys(data).length === 0) {
     document.getElementById("totalCount").innerText = "0";
     document.getElementById("totalResponses").innerText = "0";
-    document.getElementById("questionsStats").innerHTML = `
-      <p style="color: #666; padding: 20px; text-align: center; background: #f5f5f5; border-radius: 5px;">
-        Hozircha javoblar yo'q.<br>
-        <br>
-        <strong style="color: #d32f2f;">Backend API ishlamayapti</strong><br>
-        <br>
-        Backend-ni ishga tushirish uchun terminal-da quyidagi buyruqni bajaring:
-        <br><br>
-        <code style="background: #fff3e0; padding: 15px; display: block; border-radius: 5px; font-family: monospace; border-left: 4px solid #ff9800; color: #333;">
-        cd /Users/hasanhaydarov/hello_app/diploma_app/mini-app<br>
-        python3 -m uvicorn backend:app --reload --host 0.0.0.0 --port 8000
-        </code>
-      </p>
-    `;
-    return;
-  }
-
-  const today = new Date().toISOString().slice(0, 10);
-  
-  if (data[today]) {
-    const d = data[today];
-    document.getElementById("totalCount").innerText = d.count || 0;
-    document.getElementById("totalResponses").innerText = (d.count * 14) || 0;
+    document.getElementById("questionsStats").innerHTML = `<p style="color: #d32f2f; padding: 15px; background: #ffebee; border-radius: 5px;">${message}</p>`;
+    document.getElementById("responsesList").innerHTML = '<p style="text-align: center; color: #999;">Backend\'ga ulanib bo\'lmadi</p>';
   }
 }
+
+// LocalStorage funksiyasi o'chirildi - faqat backend'dan ma'lumot olinadi
 
 // Dashboard yangilash
 function updateDashboard() {
