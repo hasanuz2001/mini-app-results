@@ -1,64 +1,133 @@
-// API bazasi manzili - config.js dan olinadi
-const API_BASE = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE) 
-  ? CONFIG.API_BASE
-  : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? "http://localhost:8000"
-      : "https://your-backend-url.com"); // Production backend URL'ni qo'ying
+// GitHub Gist API sozlamalari
+const GITHUB_TOKEN = (typeof CONFIG !== 'undefined' && CONFIG.GITHUB_TOKEN) 
+  ? CONFIG.GITHUB_TOKEN 
+  : null;
+const GIST_ID = (typeof CONFIG !== 'undefined' && CONFIG.GIST_ID) 
+  ? CONFIG.GIST_ID 
+  : null;
 
 let allResponses = [];
 let allStats = {};
 
-// Ma'lumotlarni yuklash
+// GitHub Gist'dan ma'lumotlarni olish
+async function getGistData() {
+  if (!GITHUB_TOKEN || !GIST_ID) {
+    throw new Error('GITHUB_TOKEN yoki GIST_ID sozlanmagan');
+  }
+  
+  const url = `https://api.github.com/gists/${GIST_ID}`;
+  const response = await fetch(url, {
+    headers: {
+      'Authorization': `token ${GITHUB_TOKEN}`,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Gist API error: ${response.status}`);
+  }
+  
+  const gist = await response.json();
+  const content = gist.files['responses.json'].content;
+  return JSON.parse(content);
+}
+
+// Ma'lumotlarni yuklash (to'g'ridan-to'g'ri Gist API'dan)
 async function loadData() {
   try {
-    // Statistika yuklash
-    console.log("API dan yuklash: " + API_BASE + "/stats");
-    const statsResponse = await fetch(`${API_BASE}/stats`);
+    console.log("GitHub Gist'dan ma'lumotlar yuklanmoqda...");
     
-    if (!statsResponse.ok) {
-      throw new Error(`Stats API error: ${statsResponse.status}`);
+    // Token va Gist ID tekshirish
+    if (!GITHUB_TOKEN || !GIST_ID) {
+      throw new Error('GITHUB_TOKEN yoki GIST_ID sozlanmagan');
     }
     
-    const stats = await statsResponse.json();
-    allStats = stats;
-    console.log("Stats yuklandi:", allStats);
-
-    // Barcha javoblarni yuklash
-    const responsesResponse = await fetch(`${API_BASE}/responses`);
+    // Gist'dan ma'lumotlarni olish
+    const gistData = await getGistData();
     
-    if (!responsesResponse.ok) {
-      throw new Error(`Responses API error: ${responsesResponse.status}`);
+    // Agar gist bo'sh bo'lsa
+    if (!gistData || !gistData.timestamp || gistData.timestamp.length === 0) {
+      allResponses = [];
+      allStats = {
+        total: 0,
+        question_stats: {},
+        user_count: 0
+      };
+      updateDashboard();
+      updateLastUpdate();
+      return;
     }
     
-    const responses = await responsesResponse.json();
-    allResponses = responses.responses || [];
-    console.log("Responses yuklandi:", allResponses.length);
+    // Ma'lumotlarni qayta tuzish
+    allResponses = [];
+    for (let i = 0; i < gistData.timestamp.length; i++) {
+      allResponses.push({
+        timestamp: gistData.timestamp[i],
+        user_id: gistData.user_id[i],
+        question_id: gistData.question_id[i],
+        answer: gistData.answer[i]
+      });
+    }
+    
+    // Statistika hisoblash
+    const questionStats = {};
+    const userData = {};
+    
+    allResponses.forEach(row => {
+      const qId = row.question_id;
+      const answer = row.answer;
+      const userId = row.user_id;
+      
+      if (!(userId in userData)) {
+        userData[userId] = {};
+      }
+      userData[userId][qId] = answer;
+      
+      if (!(qId in questionStats)) {
+        questionStats[qId] = {};
+      }
+      
+      if (!(answer in questionStats[qId])) {
+        questionStats[qId][answer] = 0;
+      }
+      questionStats[qId][answer] += 1;
+    });
+    
+    allStats = {
+      total: allResponses.length,
+      question_stats: questionStats,
+      user_count: Object.keys(userData).length
+    };
+    
+    console.log("Ma'lumotlar yuklandi:", {
+      total: allStats.total,
+      users: allStats.user_count
+    });
 
     // Sahifani yangilash
     updateDashboard();
     updateLastUpdate();
   } catch (error) {
-    console.error("API xatosi:", error);
+    console.error("GitHub Gist API xatosi:", error);
     
     // Xato xabarini ko'rsatish
-    const message = `⚠️ Backend API bog'lanish xatosi.<br>
-    Ma'lumotlar faqat backend'dan olinadi.<br>
+    const message = `⚠️ GitHub Gist API bog'lanish xatosi.<br>
+    Ma'lumotlar to'g'ridan-to'g'ri GitHub Gist'dan olinadi.<br>
     <br>
-    <strong>Backend-ni ishga tushirish uchun:</strong><br>
+    <strong>Config.js'ni tekshiring:</strong><br>
     <code style="background: #f0f0f0; padding: 10px; display: block; margin: 10px 0; border-radius: 5px; font-family: monospace;">
-    cd /Users/hasanhaydarov/hello_app/diploma_app/mini-app<br>
-    python3 -m uvicorn backend:app --reload --host 0.0.0.0 --port 8000
+    GITHUB_TOKEN va GIST_ID sozlanganligini tekshiring
     </code>
     <br>
-    <strong>Yoki backend URL'ni tekshiring:</strong><br>
+    <strong>Xatolik:</strong><br>
     <code style="background: #fff3e0; padding: 10px; display: block; margin: 10px 0; border-radius: 5px; font-family: monospace;">
-    ${API_BASE}
+    ${error.message}
     </code>`;
     
     document.getElementById("totalCount").innerText = "0";
     document.getElementById("totalResponses").innerText = "0";
     document.getElementById("questionsStats").innerHTML = `<p style="color: #d32f2f; padding: 15px; background: #ffebee; border-radius: 5px;">${message}</p>`;
-    document.getElementById("responsesList").innerHTML = '<p style="text-align: center; color: #999;">Backend\'ga ulanib bo\'lmadi</p>';
+    document.getElementById("responsesList").innerHTML = '<p style="text-align: center; color: #999;">GitHub Gist\'ga ulanib bo\'lmadi</p>';
   }
 }
 
