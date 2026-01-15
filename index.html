@@ -12,33 +12,37 @@
   <div class="container">
     <header class="hero">
       <div class="hero-text">
-        <h1>AI Resistance Survey — Thesis Review Dashboard</h1>
-        <p class="subtitle">
+        <h1 id="heroTitle">AI Resistance Survey — Thesis Review Dashboard</h1>
+        <p id="heroSubtitle" class="subtitle">
           Uran qazib olish sohasida sun'iy intellekt joriy etilishi bo'yicha ichki qarshilik tahlili.
         </p>
-        <p class="meta">
+        <p id="heroMeta" class="meta">
           Dashboard faqat thesisni ko'rib chiquvchi foydalanuvchilar uchun mo'ljallangan.
         </p>
       </div>
-      <div class="hero-badge">
-        Thesis Review
+      <div class="hero-actions">
+        <div id="heroBadge" class="hero-badge">Thesis Review</div>
+        <div class="lang-toggle" role="group" aria-label="Language toggle">
+          <button id="langUz" type="button" class="btn-secondary">UZ</button>
+          <button id="langEn" type="button" class="btn-secondary">EN</button>
+        </div>
       </div>
     </header>
 
     <!-- Umumiy Statistika -->
     <div class="card">
-      <h2>Umumiy Natijalar</h2>
+      <h2 id="sectionSummaryTitle">Umumiy Natijalar</h2>
       <div class="metrics">
         <div>
-          <p class="label">Jami ishtirokchilar</p>
+          <p id="labelParticipants" class="label">Jami ishtirokchilar</p>
           <h3 id="totalCount" class="metric-value">0</h3>
         </div>
         <div>
-          <p class="label">Jami javoblar</p>
+          <p id="labelResponses" class="label">Jami javoblar</p>
           <h3 id="totalResponses" class="metric-value">0</h3>
         </div>
         <div>
-          <p class="label">Yangilanish vaqti</p>
+          <p id="labelLastUpdate" class="label">Yangilanish vaqti</p>
           <p id="lastUpdate" class="metric-note">Yuklanmoqda...</p>
         </div>
       </div>
@@ -46,7 +50,7 @@
 
     <!-- Savollar Statistikasi -->
     <div class="card">
-      <h2>Savol Statistikasi</h2>
+      <h2 id="sectionQuestionsTitle">Savol Statistikasi</h2>
       <div id="questionsStats" style="max-height: 500px; overflow-y: auto;">
         <p style="text-align: center; color: #999;">Yuklanmoqda...</p>
       </div>
@@ -54,9 +58,9 @@
 
     <!-- Javoblar Ro'yxati -->
     <div class="card">
-      <h2>Barcha Javoblar</h2>
+      <h2 id="sectionResponsesTitle">Barcha Javoblar</h2>
       <div class="actions">
-        <button class="btn-primary" onclick="downloadCSV()">CSV yuklab olish</button>
+        <button id="downloadCsvBtn" class="btn-primary" onclick="downloadCSV()">CSV yuklab olish</button>
       </div>
       <div id="responsesList" style="max-height: 600px; overflow-y: auto;">
         <p style="text-align: center; color: #999;">Yuklanmoqda...</p>
@@ -64,7 +68,7 @@
     </div>
 
     <div class="note">
-      <p><strong>Izoh:</strong> Dashboard har 5 soniyada avtomatik yangilanadi.</p>
+      <p><strong id="noteLabel">Izoh:</strong> <span id="noteText">Dashboard har 5 soniyada avtomatik yangilanadi.</span></p>
     </div>
   </div>
 
