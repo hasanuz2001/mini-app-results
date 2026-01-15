@@ -133,6 +133,10 @@ button:hover {
   box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
 }
 
+.hero h1 {
+  color: #ffffff;
+}
+
 .hero-text {
   max-width: 820px;
 }
@@ -140,11 +144,12 @@ button:hover {
 .hero .subtitle,
 .hero .meta {
   color: #e2e8f0;
+  display: block;
 }
 
 .hero .meta {
   margin: 6px 0 0;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .hero-badge {
