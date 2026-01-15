@@ -11,7 +11,7 @@ let allStats = {};
 
 const translations = {
   uz: {
-    title: "AI Resistance Survey — Thesis Review Dashboard",
+    title: "AI Resistance Survey Results Dashboard",
     subtitle: "Uran qazib olish sohasida sun'iy intellekt joriy etilishi bo'yicha ichki qarshilik tahlili.",
     meta: "Dashboard faqat thesisni ko'rib chiquvchi foydalanuvchilar uchun mo'ljallangan.",
     badge: "Thesis Review",
@@ -57,7 +57,7 @@ const translations = {
     }
   },
   en: {
-    title: "AI Resistance Survey — Thesis Review Dashboard",
+    title: "AI Resistance Survey Results Dashboard",
     subtitle: "Analysis of internal resistance to AI adoption in uranium mining.",
     meta: "This dashboard is intended for thesis reviewers only.",
     badge: "Thesis Review",
@@ -159,12 +159,22 @@ function setLanguage(lang) {
   updateLastUpdate();
 }
 
-const langUzButton = document.getElementById("langUz");
-const langEnButton = document.getElementById("langEn");
-if (langUzButton) langUzButton.addEventListener("click", () => setLanguage("uz"));
-if (langEnButton) langEnButton.addEventListener("click", () => setLanguage("en"));
+function initLanguageControls() {
+  const langUzButton = document.getElementById("langUz");
+  const langEnButton = document.getElementById("langEn");
+  if (langUzButton) langUzButton.addEventListener("click", () => setLanguage("uz"));
+  if (langEnButton) langEnButton.addEventListener("click", () => setLanguage("en"));
+}
 
-applyTranslations();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    initLanguageControls();
+    applyTranslations();
+  });
+} else {
+  initLanguageControls();
+  applyTranslations();
+}
 
 // GitHub Gist'dan ma'lumotlarni olish
 async function getGistData() {

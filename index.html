@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AI Resistance Survey — Thesis Review Dashboard</title>
+  <title>AI Resistance Survey Results Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <link rel="stylesheet" href="style.css">
@@ -12,7 +12,7 @@
   <div class="container">
     <header class="hero">
       <div class="hero-text">
-        <h1 id="heroTitle">AI Resistance Survey — Thesis Review Dashboard</h1>
+        <h1 id="heroTitle">AI Resistance Survey Results Dashboard</h1>
         <p id="heroSubtitle" class="subtitle">
           Uran qazib olish sohasida sun'iy intellekt joriy etilishi bo'yicha ichki qarshilik tahlili.
         </p>
@@ -23,8 +23,8 @@
       <div class="hero-actions">
         <div id="heroBadge" class="hero-badge">Thesis Review</div>
         <div class="lang-toggle" role="group" aria-label="Language toggle">
-          <button id="langUz" type="button" class="btn-secondary">UZ</button>
-          <button id="langEn" type="button" class="btn-secondary">EN</button>
+          <button id="langUz" type="button" class="btn-secondary" onclick="setLanguage('uz')">UZ</button>
+          <button id="langEn" type="button" class="btn-secondary" onclick="setLanguage('en')">EN</button>
         </div>
       </div>
     </header>
