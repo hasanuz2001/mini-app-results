@@ -267,11 +267,12 @@ async function loadData() {
     // Ma'lumotlarni qayta tuzish
     allResponses = [];
     for (let i = 0; i < gistData.timestamp.length; i++) {
+      const parsedAnswer = parseStoredAnswer(gistData.answer[i]);
       allResponses.push({
         timestamp: gistData.timestamp[i],
         user_id: gistData.user_id[i],
         question_id: gistData.question_id[i],
-        answer: gistData.answer[i]
+        answer: parsedAnswer
       });
     }
     
@@ -290,10 +291,15 @@ async function loadData() {
         questionStats[qId] = {};
       }
       
-      if (!(answer in questionStats[qId])) {
-        questionStats[qId][answer] = 0;
+      const answerKey = answer?.id || normalizeAnswer(answer?.text);
+      if (!answerKey) {
+        return;
       }
-      questionStats[qId][answer] += 1;
+
+      if (!(answerKey in questionStats[qId])) {
+        questionStats[qId][answerKey] = 0;
+      }
+      questionStats[qId][answerKey] += 1;
     });
     
     allStats = {
@@ -397,9 +403,11 @@ function displayQuestionStats() {
     } else {
       const usedAnswers = new Set();
 
-      questionOptions.forEach((option) => {
+      questionOptions.forEach((option, index) => {
         const normalizedOption = normalizeAnswer(option);
-        const count = normalizedCounts.get(normalizedOption) || 0;
+        const optionId = String(index + 1);
+        const count = (answers[optionId] || 0) + (normalizedCounts.get(normalizedOption) || 0);
+        usedAnswers.add(optionId);
         usedAnswers.add(normalizedOption);
         html += renderAnswerRow(option, count, totalForQuestion, t);
       });
@@ -436,6 +444,55 @@ function normalizeAnswer(value) {
   return String(value)
     .trim()
     .replace(/^["'«»]+|["'«»]+$/g, "");
+}
+
+function parseStoredAnswer(value) {
+  if (value === null || value === undefined) {
+    return { raw: "", id: null, text: "" };
+  }
+
+  if (typeof value === "object") {
+    return normalizeParsedAnswer(value);
+  }
+
+  const rawText = String(value);
+  try {
+    const parsed = JSON.parse(rawText);
+    if (parsed && typeof parsed === "object") {
+      return normalizeParsedAnswer(parsed, rawText);
+    }
+  } catch (error) {
+    // ignore JSON parse errors
+  }
+
+  return { raw: rawText, id: null, text: rawText };
+}
+
+function normalizeParsedAnswer(parsed, rawText = "") {
+  if (!parsed || typeof parsed !== "object") {
+    return { raw: rawText, id: null, text: rawText };
+  }
+
+  if (parsed.id && typeof parsed.text === "string") {
+    return { raw: rawText, id: String(parsed.id), text: parsed.text };
+  }
+
+  if (parsed.id === "open_option" || parsed.selected) {
+    const selected = parsed.selected;
+    if (selected && typeof selected === "object") {
+      return {
+        raw: rawText,
+        id: selected.id ? String(selected.id) : null,
+        text: selected.text || ""
+      };
+    }
+    if (typeof selected === "string") {
+      return { raw: rawText, id: null, text: selected };
+    }
+    return { raw: rawText, id: null, text: "" };
+  }
+
+  return { raw: rawText, id: null, text: JSON.stringify(parsed) };
 }
 
 function renderAnswerRow(label, count, totalForQuestion, t) {
@@ -513,7 +570,7 @@ function downloadCSV() {
   let csv = t.csv.header;
   
   allResponses.forEach(row => {
-    csv += `"${row.timestamp}","${row.user_id}","${row.question_id}","${row.answer}"\n`;
+    csv += `"${row.timestamp}","${row.user_id}","${row.question_id}","${formatAnswerForCsv(row.answer)}"\n`;
   });
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -521,6 +578,22 @@ function downloadCSV() {
   link.href = URL.createObjectURL(blob);
   link.download = `survey_results_${new Date().toISOString().slice(0, 10)}.csv`;
   link.click();
+}
+
+function formatAnswerForCsv(answer) {
+  if (!answer) {
+    return "";
+  }
+  if (typeof answer === "string") {
+    return answer;
+  }
+  if (answer.id && typeof answer.text === "string") {
+    return `${answer.id}::${answer.text}`;
+  }
+  if (answer.text) {
+    return String(answer.text);
+  }
+  return JSON.stringify(answer);
 }
 
 // Yakungi yangilash vaqti
