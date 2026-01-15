@@ -104,6 +104,65 @@ const translations = {
   }
 };
 
+const questionText = {
+  "1": {
+    uz: "Ism sharifingizni yozing (ixtiyoriy)",
+    en: "Write your name and surname (optional)"
+  },
+  "2": {
+    uz: "Uran sohasi bilan qo'shganda umumiy ish tajribangiz?",
+    en: "What is your total work experience?"
+  },
+  "3": {
+    uz: "Uran sohasida sun'iy intellekt texnik xizmat samaradorligini oshiradi deb o‘ylaysizmi?",
+    en: "Do you think artificial intelligence improves the efficiency of technical maintenance?"
+  },
+  "4": {
+    uz: "Uran sohasida sun'iy intellekt qarorlariga qanchalik ishonasiz?",
+    en: "How much do you trust decisions made by artificial intelligence?"
+  },
+  "5": {
+    uz: "Rahbariyat Uran sohasida sun'iy intellektni joriy etish maqsadini aniq tushuntirdimi?",
+    en: "Did management clearly explain the objectives of implementing artificial intelligence?"
+  },
+  "6": {
+    uz: "Rahbarlar Uran sohasida sun'iy intellekt orqali xarajatlar kamayishini tushuntirdimi?",
+    en: "Did management explain how artificial intelligence would reduce costs?"
+  },
+  "7": {
+    uz: "Uran sohasida sun'iy intellekt joriy etishda mutaxassislar fikri inobatga olinadi deb o‘ylaysizmi?",
+    en: "Do you think experts’ opinions are taken into account when implementing AI?"
+  },
+  "8": {
+    uz: "Uran sohasida sun'iy intellekt ish o‘rnimga xavf soladi deb o‘ylaysizmi?",
+    en: "Do you think artificial intelligence threatens your job?"
+  },
+  "9": {
+    uz: "Uran sohasida sun'iy intellekt xato qilsa, javobgarlik noaniq deb hisoblaysizmi?",
+    en: "Do you think accountability is unclear if artificial intelligence makes a mistake?"
+  },
+  "10": {
+    uz: "Uran sohasida sun'iy intellektga ishonish psixologik jihatdan qiyin deb hisoblaysizmi?",
+    en: "Do you find it psychologically difficult to trust artificial intelligence?"
+  },
+  "11": {
+    uz: "Uran sohasida sun'iy intellektdan foydalanish bo‘yicha yetarli trening berildimi?",
+    en: "Was sufficient training provided on how to use artificial intelligence?"
+  },
+  "12": {
+    uz: "Rahbarlar raqamli texnologiyalarni tushunadi deb o‘ylaysizmi?",
+    en: "Do you think management understands digital technologies?"
+  },
+  "13": {
+    uz: "Oldingi innovatsiyalar korxonada muvaffaqiyatli bo‘lgan deb hisoblaysizmi?",
+    en: "Do you think previous innovations in the company were successful?"
+  },
+  "14": {
+    uz: "Uran sohasida sun'iy intellektni muvaffaqiyatli joriy etish asosan rahbariyatga bog‘liq deb o‘ylaysizmi?",
+    en: "Do you think successful implementation of artificial intelligence mainly depends on management?"
+  }
+};
+
 const localeMap = {
   uz: "uz-UZ",
   en: "en-US"
@@ -346,9 +405,13 @@ function displayQuestionStats() {
     const answers = stats[qId];
     const totalForQuestion = Object.values(answers).reduce((a, b) => a + b, 0);
     
+    const questionMap = questionText[String(qId)] || null;
+    const questionLabel = questionMap ? (questionMap[currentLang] || questionMap.uz) : `${t.questionLabel} #${qId}`;
+
     html += `
       <div style="margin-bottom: 25px; padding: 20px; background: #f9f9f9; border-radius: 8px; border-left: 5px solid #2a9df4;">
-        <h4 style="margin: 0 0 15px 0; color: #333; font-size: 16px;">📋 ${t.questionLabel} #${qId}</h4>
+        <h4 style="margin: 0 0 8px 0; color: #333; font-size: 16px;">📋 ${questionLabel}</h4>
+        <p style="margin: 0 0 12px; color: #64748b; font-size: 12px;">${t.questionLabel} #${qId}</p>
         <div style="background: white; padding: 15px; border-radius: 6px;">
     `;
 
