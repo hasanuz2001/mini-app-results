@@ -277,17 +277,14 @@ async function loadData() {
     
     // Statistika hisoblash
     const questionStats = {};
-    const userData = {};
+    const submissionKeys = new Set();
     
     allResponses.forEach(row => {
       const qId = row.question_id;
       const answer = row.answer;
       const userId = row.user_id;
       
-      if (!(userId in userData)) {
-        userData[userId] = {};
-      }
-      userData[userId][qId] = answer;
+      submissionKeys.add(`${userId}::${row.timestamp}`);
       
       if (!(qId in questionStats)) {
         questionStats[qId] = {};
@@ -302,7 +299,7 @@ async function loadData() {
     allStats = {
       total: allResponses.length,
       question_stats: questionStats,
-      user_count: Object.keys(userData).length
+      user_count: submissionKeys.size
     };
     
     console.log("Ma'lumotlar yuklandi:", {
@@ -379,6 +376,12 @@ function displayQuestionStats() {
     const question = findQuestionById(qId);
     const questionText = question?.text?.[currentLang] || question?.text?.uz || `${t.questionLabel} #${qId}`;
     const questionOptions = question?.options?.[currentLang] || question?.options?.uz || [];
+    const normalizedCounts = new Map();
+
+    Object.entries(answers).forEach(([answer, count]) => {
+      const normalized = normalizeAnswer(answer);
+      normalizedCounts.set(normalized, (normalizedCounts.get(normalized) || 0) + count);
+    });
 
     html += `
       <div style="margin-bottom: 25px; padding: 20px; background: #f9f9f9; border-radius: 8px; border-left: 5px solid #2a9df4;">
@@ -395,17 +398,17 @@ function displayQuestionStats() {
       const usedAnswers = new Set();
 
       questionOptions.forEach((option) => {
-        const count = answers[option] || 0;
-        usedAnswers.add(option);
+        const normalizedOption = normalizeAnswer(option);
+        const count = normalizedCounts.get(normalizedOption) || 0;
+        usedAnswers.add(normalizedOption);
         html += renderAnswerRow(option, count, totalForQuestion, t);
       });
 
-      const unmatchedCount = Object.entries(answers)
+      const unmatchedCount = Array.from(normalizedCounts.entries())
         .filter(([answer]) => !usedAnswers.has(answer))
         .reduce((sum, [, count]) => sum + count, 0);
 
-      const hasOpenOption = question?.open_option;
-      if (hasOpenOption) {
+      if (unmatchedCount > 0) {
         const otherLabel = t.optionLabels?.other || "Other responses";
         html += renderAnswerRow(otherLabel, unmatchedCount, totalForQuestion, t);
       }
@@ -424,6 +427,15 @@ function displayQuestionStats() {
   });
 
   statsDiv.innerHTML = html;
+}
+
+function normalizeAnswer(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  return String(value)
+    .trim()
+    .replace(/^["'«»]+|["'«»]+$/g, "");
 }
 
 function renderAnswerRow(label, count, totalForQuestion, t) {
