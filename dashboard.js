@@ -38,6 +38,10 @@ const translations = {
     },
     questionLabel: "Savol",
     countUnit: "ta",
+    optionLabels: {
+      openText: "Erkin javoblar",
+      other: "Boshqa javoblar"
+    },
     table: {
       date: "Sana",
       userId: "Foydalanuvchi identifikatori",
@@ -84,6 +88,10 @@ const translations = {
     },
     questionLabel: "Question",
     countUnit: "responses",
+    optionLabels: {
+      openText: "Open text responses",
+      other: "Other responses"
+    },
     table: {
       date: "Date",
       userId: "User identifier",
@@ -104,64 +112,17 @@ const translations = {
   }
 };
 
-const questionText = {
-  "1": {
-    uz: "Ism sharifingizni yozing (ixtiyoriy)",
-    en: "Write your name and surname (optional)"
-  },
-  "2": {
-    uz: "Uran sohasi bilan qo'shganda umumiy ish tajribangiz?",
-    en: "What is your total work experience?"
-  },
-  "3": {
-    uz: "Uran sohasida sun'iy intellekt texnik xizmat samaradorligini oshiradi deb o‘ylaysizmi?",
-    en: "Do you think artificial intelligence improves the efficiency of technical maintenance?"
-  },
-  "4": {
-    uz: "Uran sohasida sun'iy intellekt qarorlariga qanchalik ishonasiz?",
-    en: "How much do you trust decisions made by artificial intelligence?"
-  },
-  "5": {
-    uz: "Rahbariyat Uran sohasida sun'iy intellektni joriy etish maqsadini aniq tushuntirdimi?",
-    en: "Did management clearly explain the objectives of implementing artificial intelligence?"
-  },
-  "6": {
-    uz: "Rahbarlar Uran sohasida sun'iy intellekt orqali xarajatlar kamayishini tushuntirdimi?",
-    en: "Did management explain how artificial intelligence would reduce costs?"
-  },
-  "7": {
-    uz: "Uran sohasida sun'iy intellekt joriy etishda mutaxassislar fikri inobatga olinadi deb o‘ylaysizmi?",
-    en: "Do you think experts’ opinions are taken into account when implementing AI?"
-  },
-  "8": {
-    uz: "Uran sohasida sun'iy intellekt ish o‘rnimga xavf soladi deb o‘ylaysizmi?",
-    en: "Do you think artificial intelligence threatens your job?"
-  },
-  "9": {
-    uz: "Uran sohasida sun'iy intellekt xato qilsa, javobgarlik noaniq deb hisoblaysizmi?",
-    en: "Do you think accountability is unclear if artificial intelligence makes a mistake?"
-  },
-  "10": {
-    uz: "Uran sohasida sun'iy intellektga ishonish psixologik jihatdan qiyin deb hisoblaysizmi?",
-    en: "Do you find it psychologically difficult to trust artificial intelligence?"
-  },
-  "11": {
-    uz: "Uran sohasida sun'iy intellektdan foydalanish bo‘yicha yetarli trening berildimi?",
-    en: "Was sufficient training provided on how to use artificial intelligence?"
-  },
-  "12": {
-    uz: "Rahbarlar raqamli texnologiyalarni tushunadi deb o‘ylaysizmi?",
-    en: "Do you think management understands digital technologies?"
-  },
-  "13": {
-    uz: "Oldingi innovatsiyalar korxonada muvaffaqiyatli bo‘lgan deb hisoblaysizmi?",
-    en: "Do you think previous innovations in the company were successful?"
-  },
-  "14": {
-    uz: "Uran sohasida sun'iy intellektni muvaffaqiyatli joriy etish asosan rahbariyatga bog‘liq deb o‘ylaysizmi?",
-    en: "Do you think successful implementation of artificial intelligence mainly depends on management?"
+function getQuestions() {
+  if (typeof questions === "undefined") {
+    return [];
   }
-};
+  return questions.filter((item) => String(item.id) !== "1");
+}
+
+function findQuestionById(id) {
+  const items = getQuestions();
+  return items.find((item) => String(item.id) === String(id)) || null;
+}
 
 const localeMap = {
   uz: "uz-UZ",
@@ -405,37 +366,46 @@ function displayQuestionStats() {
     const answers = stats[qId];
     const totalForQuestion = Object.values(answers).reduce((a, b) => a + b, 0);
     
-    const questionMap = questionText[String(qId)] || null;
-    const questionLabel = questionMap ? (questionMap[currentLang] || questionMap.uz) : `${t.questionLabel} #${qId}`;
+    const question = findQuestionById(qId);
+    const questionText = question?.text?.[currentLang] || question?.text?.uz || `${t.questionLabel} #${qId}`;
+    const questionOptions = question?.options?.[currentLang] || question?.options?.uz || [];
 
     html += `
       <div style="margin-bottom: 25px; padding: 20px; background: #f9f9f9; border-radius: 8px; border-left: 5px solid #2a9df4;">
-        <h4 style="margin: 0 0 8px 0; color: #333; font-size: 16px;">📋 ${questionLabel}</h4>
+        <h4 style="margin: 0 0 8px 0; color: #333; font-size: 16px;">📋 ${questionText}</h4>
         <p style="margin: 0 0 12px; color: #64748b; font-size: 12px;">${t.questionLabel} #${qId}</p>
         <div style="background: white; padding: 15px; border-radius: 6px;">
     `;
 
-    // Javoblarni soni bo'yicha tartibi bilan ko'rsatish (eng ko'p tanlagan birinchi)
-    const sortedAnswers = Object.entries(answers)
-      .sort((a, b) => b[1] - a[1])
-      .forEach(([answer, count]) => {
-        const percentage = totalForQuestion > 0 ? ((count / totalForQuestion) * 100).toFixed(1) : 0;
-        const barWidth = percentage;
-        
-        html += `
-          <div style="margin-bottom: 12px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-              <span style="font-weight: bold; color: #333; word-break: break-word; max-width: 70%;">${answer}</span>
-              <span style="color: #2a9df4; font-weight: bold;">${count} ${t.countUnit} (${percentage}%)</span>
-            </div>
-            <div style="width: 100%; height: 25px; background: #e8f0f5; border-radius: 4px; overflow: hidden;">
-              <div style="width: ${barWidth}%; height: 100%; background: linear-gradient(90deg, #2a9df4, #1976d2); display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;">
-                ${barWidth > 15 ? `<span style="color: white; font-size: 12px; font-weight: bold;">${percentage}%</span>` : ''}
-              </div>
-            </div>
-          </div>
-        `;
+    if (question?.type === "open_text") {
+      const openLabel = t.optionLabels?.openText || "Open text responses";
+      const openCount = totalForQuestion;
+      html += renderAnswerRow(openLabel, openCount, totalForQuestion, t);
+    } else {
+      const usedAnswers = new Set();
+
+      questionOptions.forEach((option) => {
+        const count = answers[option] || 0;
+        usedAnswers.add(option);
+        html += renderAnswerRow(option, count, totalForQuestion, t);
       });
+
+      const unmatchedCount = Object.entries(answers)
+        .filter(([answer]) => !usedAnswers.has(answer))
+        .reduce((sum, [, count]) => sum + count, 0);
+
+      const hasOpenOption = question?.open_option;
+      if (hasOpenOption) {
+        const otherLabel = t.optionLabels?.other || "Other responses";
+        html += renderAnswerRow(otherLabel, unmatchedCount, totalForQuestion, t);
+      }
+
+      if (!questionOptions.length && Object.keys(answers).length) {
+        Object.entries(answers).forEach(([answer, count]) => {
+          html += renderAnswerRow(answer, count, totalForQuestion, t);
+        });
+      }
+    }
 
     html += `
         </div>
@@ -444,6 +414,25 @@ function displayQuestionStats() {
   });
 
   statsDiv.innerHTML = html;
+}
+
+function renderAnswerRow(label, count, totalForQuestion, t) {
+  const percentage = totalForQuestion > 0 ? ((count / totalForQuestion) * 100).toFixed(1) : 0;
+  const barWidth = percentage;
+
+  return `
+    <div style="margin-bottom: 12px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+        <span style="font-weight: bold; color: #333; word-break: break-word; max-width: 70%;">${label}</span>
+        <span style="color: #2a9df4; font-weight: bold;">${count} ${t.countUnit} (${percentage}%)</span>
+      </div>
+      <div style="width: 100%; height: 25px; background: #e8f0f5; border-radius: 4px; overflow: hidden;">
+        <div style="width: ${barWidth}%; height: 100%; background: linear-gradient(90deg, #2a9df4, #1976d2); display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;">
+          ${barWidth > 15 ? `<span style="color: white; font-size: 12px; font-weight: bold;">${percentage}%</span>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 // Javoblarni ko'rsatish
