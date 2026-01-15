@@ -25,11 +25,9 @@ const translations = {
       participants: "Ishtirokchilar soni",
       responses: "Javoblar soni",
       lastUpdate: "So'nggi yangilanish",
-      langUz: "O'zbekcha",
-      langUzCyrl: "O'zbekcha (kiril)",
+      langUzCombined: "O'zbekcha (lotin + кирил)",
       langRu: "Русский",
-      langEn: "English",
-      langUnknown: "Unknown"
+      langEn: "English"
     },
     actions: {
       downloadCsv: "CSV formatida yuklab olish",
@@ -82,11 +80,9 @@ const translations = {
       participants: "Number of participants",
       responses: "Number of responses",
       lastUpdate: "Last update",
-      langUz: "Uzbek",
-      langUzCyrl: "Uzbek (Cyrillic)",
+      langUzCombined: "Uzbek (Latin + Cyrillic)",
       langRu: "Russian",
-      langEn: "English",
-      langUnknown: "Unknown"
+      langEn: "English"
     },
     actions: {
       downloadCsv: "Download as CSV",
@@ -160,11 +156,9 @@ function applyTranslations() {
   const labelParticipants = document.getElementById("labelParticipants");
   const labelResponses = document.getElementById("labelResponses");
   const labelLastUpdate = document.getElementById("labelLastUpdate");
-  const labelLangUz = document.getElementById("labelLangUz");
-  const labelLangUzCyrl = document.getElementById("labelLangUzCyrl");
+  const labelLangUzCombined = document.getElementById("labelLangUzCombined");
   const labelLangRu = document.getElementById("labelLangRu");
   const labelLangEn = document.getElementById("labelLangEn");
-  const labelLangUnknown = document.getElementById("labelLangUnknown");
   const downloadCsvBtn = document.getElementById("downloadCsvBtn");
   const refreshBtn = document.getElementById("refreshBtn");
   const noteLabel = document.getElementById("noteLabel");
@@ -181,11 +175,9 @@ function applyTranslations() {
   if (labelParticipants) labelParticipants.innerText = t.labels.participants;
   if (labelResponses) labelResponses.innerText = t.labels.responses;
   if (labelLastUpdate) labelLastUpdate.innerText = t.labels.lastUpdate;
-  if (labelLangUz) labelLangUz.innerText = t.labels.langUz;
-  if (labelLangUzCyrl) labelLangUzCyrl.innerText = t.labels.langUzCyrl;
+  if (labelLangUzCombined) labelLangUzCombined.innerText = t.labels.langUzCombined;
   if (labelLangRu) labelLangRu.innerText = t.labels.langRu;
   if (labelLangEn) labelLangEn.innerText = t.labels.langEn;
-  if (labelLangUnknown) labelLangUnknown.innerText = t.labels.langUnknown;
   if (downloadCsvBtn) downloadCsvBtn.innerText = t.actions.downloadCsv;
   if (refreshBtn) refreshBtn.innerText = t.actions.refresh;
   if (noteLabel) noteLabel.innerText = t.note.label;
@@ -291,11 +283,9 @@ async function loadData() {
     // Ma'lumotlarni qayta tuzish
     allResponses = [];
     const submissionLangCounts = {
-      uz: 0,
-      uz_cyrl: 0,
+      uz_combined: 0,
       ru: 0,
-      en: 0,
-      unknown: 0
+      en: 0
     };
     const submissionLangMap = new Map();
     for (let i = 0; i < gistData.timestamp.length; i++) {
@@ -393,16 +383,12 @@ function updateDashboard() {
 
   document.getElementById("totalCount").innerText = totalCount;
   document.getElementById("totalResponses").innerText = totalResponses;
-  const langUz = document.getElementById("countLangUz");
-  const langUzCyrl = document.getElementById("countLangUzCyrl");
+  const langUzCombined = document.getElementById("countLangUzCombined");
   const langRu = document.getElementById("countLangRu");
   const langEn = document.getElementById("countLangEn");
-  const langUnknown = document.getElementById("countLangUnknown");
-  if (langUz) langUz.innerText = langCounts.uz || 0;
-  if (langUzCyrl) langUzCyrl.innerText = langCounts.uz_cyrl || 0;
+  if (langUzCombined) langUzCombined.innerText = langCounts.uz_combined || 0;
   if (langRu) langRu.innerText = langCounts.ru || 0;
   if (langEn) langEn.innerText = langCounts.en || 0;
-  if (langUnknown) langUnknown.innerText = langCounts.unknown || 0;
 
   // Savollar statistikasi
   displayQuestionStats();
@@ -500,22 +486,16 @@ function normalizeAnswer(value) {
 
 function normalizeLang(value) {
   if (!value) {
-    return "unknown";
+    return "uz_combined";
   }
   const normalized = String(value).toLowerCase().replace(/[^a-z_]/g, "");
-  if (normalized === "uz" || normalized === "uzb") {
-    return "uz";
-  }
-  if (normalized === "uz_cyrl" || normalized === "uzcyrl" || normalized === "uz_cyrillic") {
-    return "uz_cyrl";
-  }
   if (normalized === "ru" || normalized === "rus") {
     return "ru";
   }
   if (normalized === "en" || normalized === "eng") {
     return "en";
   }
-  return "unknown";
+  return "uz_combined";
 }
 
 function parseStoredAnswer(value) {
