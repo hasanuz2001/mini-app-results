@@ -17,13 +17,19 @@ const translations = {
     badge: "Ekspertiza",
     sections: {
       summary: "Umumiy Ko'rsatkichlar",
+      languages: "Til bo'yicha taqsimot",
       questions: "Savollar Bo'yicha Tahlil",
       responses: "Barcha Javoblar"
     },
     labels: {
       participants: "Ishtirokchilar soni",
       responses: "Javoblar soni",
-      lastUpdate: "So'nggi yangilanish"
+      lastUpdate: "So'nggi yangilanish",
+      langUz: "O'zbekcha",
+      langUzCyrl: "O'zbekcha (kiril)",
+      langRu: "Русский",
+      langEn: "English",
+      langUnknown: "Unknown"
     },
     actions: {
       downloadCsv: "CSV formatida yuklab olish",
@@ -68,13 +74,19 @@ const translations = {
     badge: "Academic Review",
     sections: {
       summary: "Overall Indicators",
+      languages: "Language breakdown",
       questions: "Question-Level Analysis",
       responses: "All Responses"
     },
     labels: {
       participants: "Number of participants",
       responses: "Number of responses",
-      lastUpdate: "Last update"
+      lastUpdate: "Last update",
+      langUz: "Uzbek",
+      langUzCyrl: "Uzbek (Cyrillic)",
+      langRu: "Russian",
+      langEn: "English",
+      langUnknown: "Unknown"
     },
     actions: {
       downloadCsv: "Download as CSV",
@@ -142,11 +154,17 @@ function applyTranslations() {
   const heroMeta = document.getElementById("heroMeta");
   const heroBadge = document.getElementById("heroBadge");
   const sectionSummaryTitle = document.getElementById("sectionSummaryTitle");
+  const sectionLanguagesTitle = document.getElementById("sectionLanguagesTitle");
   const sectionQuestionsTitle = document.getElementById("sectionQuestionsTitle");
   const sectionResponsesTitle = document.getElementById("sectionResponsesTitle");
   const labelParticipants = document.getElementById("labelParticipants");
   const labelResponses = document.getElementById("labelResponses");
   const labelLastUpdate = document.getElementById("labelLastUpdate");
+  const labelLangUz = document.getElementById("labelLangUz");
+  const labelLangUzCyrl = document.getElementById("labelLangUzCyrl");
+  const labelLangRu = document.getElementById("labelLangRu");
+  const labelLangEn = document.getElementById("labelLangEn");
+  const labelLangUnknown = document.getElementById("labelLangUnknown");
   const downloadCsvBtn = document.getElementById("downloadCsvBtn");
   const refreshBtn = document.getElementById("refreshBtn");
   const noteLabel = document.getElementById("noteLabel");
@@ -157,11 +175,17 @@ function applyTranslations() {
   if (heroMeta) heroMeta.innerText = t.meta;
   if (heroBadge) heroBadge.innerText = t.badge;
   if (sectionSummaryTitle) sectionSummaryTitle.innerText = t.sections.summary;
+  if (sectionLanguagesTitle) sectionLanguagesTitle.innerText = t.sections.languages;
   if (sectionQuestionsTitle) sectionQuestionsTitle.innerText = t.sections.questions;
   if (sectionResponsesTitle) sectionResponsesTitle.innerText = t.sections.responses;
   if (labelParticipants) labelParticipants.innerText = t.labels.participants;
   if (labelResponses) labelResponses.innerText = t.labels.responses;
   if (labelLastUpdate) labelLastUpdate.innerText = t.labels.lastUpdate;
+  if (labelLangUz) labelLangUz.innerText = t.labels.langUz;
+  if (labelLangUzCyrl) labelLangUzCyrl.innerText = t.labels.langUzCyrl;
+  if (labelLangRu) labelLangRu.innerText = t.labels.langRu;
+  if (labelLangEn) labelLangEn.innerText = t.labels.langEn;
+  if (labelLangUnknown) labelLangUnknown.innerText = t.labels.langUnknown;
   if (downloadCsvBtn) downloadCsvBtn.innerText = t.actions.downloadCsv;
   if (refreshBtn) refreshBtn.innerText = t.actions.refresh;
   if (noteLabel) noteLabel.innerText = t.note.label;
@@ -266,13 +290,23 @@ async function loadData() {
     
     // Ma'lumotlarni qayta tuzish
     allResponses = [];
+    const submissionLangCounts = {
+      uz: 0,
+      uz_cyrl: 0,
+      ru: 0,
+      en: 0,
+      unknown: 0
+    };
+    const submissionLangMap = new Map();
     for (let i = 0; i < gistData.timestamp.length; i++) {
       const parsedAnswer = parseStoredAnswer(gistData.answer[i]);
+      const responseLang = gistData.language ? gistData.language[i] : null;
       allResponses.push({
         timestamp: gistData.timestamp[i],
         user_id: gistData.user_id[i],
         question_id: gistData.question_id[i],
-        answer: parsedAnswer
+        answer: parsedAnswer,
+        language: responseLang
       });
     }
     
@@ -284,8 +318,14 @@ async function loadData() {
       const qId = row.question_id;
       const answer = row.answer;
       const userId = row.user_id;
-      
-      submissionKeys.add(`${userId}::${row.timestamp}`);
+      const submissionKey = `${userId}::${row.timestamp}`;
+      submissionKeys.add(submissionKey);
+
+      if (!submissionLangMap.has(submissionKey)) {
+        const normalizedLang = normalizeLang(row.language);
+        submissionLangMap.set(submissionKey, normalizedLang);
+        submissionLangCounts[normalizedLang] = (submissionLangCounts[normalizedLang] || 0) + 1;
+      }
       
       if (!(qId in questionStats)) {
         questionStats[qId] = {};
@@ -305,7 +345,8 @@ async function loadData() {
     allStats = {
       total: allResponses.length,
       question_stats: questionStats,
-      user_count: submissionKeys.size
+      user_count: submissionKeys.size,
+      language_counts: submissionLangCounts
     };
     
     console.log("Ma'lumotlar yuklandi:", {
@@ -348,9 +389,20 @@ function updateDashboard() {
   // Umumiy statistika
   const totalCount = allStats.user_count || 0;
   const totalResponses = allStats.total || 0;
+  const langCounts = allStats.language_counts || {};
 
   document.getElementById("totalCount").innerText = totalCount;
   document.getElementById("totalResponses").innerText = totalResponses;
+  const langUz = document.getElementById("countLangUz");
+  const langUzCyrl = document.getElementById("countLangUzCyrl");
+  const langRu = document.getElementById("countLangRu");
+  const langEn = document.getElementById("countLangEn");
+  const langUnknown = document.getElementById("countLangUnknown");
+  if (langUz) langUz.innerText = langCounts.uz || 0;
+  if (langUzCyrl) langUzCyrl.innerText = langCounts.uz_cyrl || 0;
+  if (langRu) langRu.innerText = langCounts.ru || 0;
+  if (langEn) langEn.innerText = langCounts.en || 0;
+  if (langUnknown) langUnknown.innerText = langCounts.unknown || 0;
 
   // Savollar statistikasi
   displayQuestionStats();
@@ -444,6 +496,26 @@ function normalizeAnswer(value) {
   return String(value)
     .trim()
     .replace(/^["'«»]+|["'«»]+$/g, "");
+}
+
+function normalizeLang(value) {
+  if (!value) {
+    return "unknown";
+  }
+  const normalized = String(value).toLowerCase().replace(/[^a-z_]/g, "");
+  if (normalized === "uz" || normalized === "uzb") {
+    return "uz";
+  }
+  if (normalized === "uz_cyrl" || normalized === "uzcyrl" || normalized === "uz_cyrillic") {
+    return "uz_cyrl";
+  }
+  if (normalized === "ru" || normalized === "rus") {
+    return "ru";
+  }
+  if (normalized === "en" || normalized === "eng") {
+    return "en";
+  }
+  return "unknown";
 }
 
 function parseStoredAnswer(value) {
