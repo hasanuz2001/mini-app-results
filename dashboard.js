@@ -12,94 +12,94 @@ let allStats = {};
 const translations = {
   uz: {
     title: "AI Resistance Survey Results Dashboard",
-    subtitle: "Uran qazib olish sohasida sun'iy intellekt joriy etilishi bo'yicha ichki qarshilik tahlili.",
-    meta: "Dashboard faqat thesisni ko'rib chiquvchi foydalanuvchilar uchun mo'ljallangan.",
-    badge: "Thesis Review",
+    subtitle: "Uran qazib olish sohasida sun'iy intellekt joriy etilishiga nisbatan ichki qarshilik bo'yicha tadqiqot natijalari.",
+    meta: "Ushbu panel dissertatsiya (thesis) ekspertizasi doirasida ko'rib chiqish uchun mo'ljallangan.",
+    badge: "Ekspertiza",
     sections: {
-      summary: "Umumiy Natijalar",
-      questions: "Savol Statistikasi",
+      summary: "Umumiy Ko'rsatkichlar",
+      questions: "Savollar Bo'yicha Tahlil",
       responses: "Barcha Javoblar"
     },
     labels: {
-      participants: "Jami ishtirokchilar",
-      responses: "Jami javoblar",
-      lastUpdate: "Yangilanish vaqti"
+      participants: "Ishtirokchilar soni",
+      responses: "Javoblar soni",
+      lastUpdate: "So'nggi yangilanish"
     },
     actions: {
-      downloadCsv: "CSV yuklab olish"
+      downloadCsv: "CSV formatida yuklab olish"
     },
     note: {
-      label: "Izoh:",
-      text: "Dashboard har 5 soniyada avtomatik yangilanadi."
+      label: "Eslatma:",
+      text: "Ma'lumotlar har 5 soniyada avtomatik yangilanadi."
     },
     states: {
-      loading: "Yuklanmoqda...",
-      noData: "Javoblar yo'q"
+      loading: "Ma'lumotlar yuklanmoqda...",
+      noData: "Ma'lumotlar mavjud emas"
     },
     questionLabel: "Savol",
     countUnit: "ta",
     table: {
       date: "Sana",
-      userId: "Foydalanuvchi ID",
+      userId: "Foydalanuvchi identifikatori",
       answers: "Javoblar"
     },
     errors: {
-      connectionTitle: "⚠️ GitHub Gist API bog'lanish xatosi.",
-      source: "Ma'lumotlar to'g'ridan-to'g'ri GitHub Gist'dan olinadi.",
-      checkConfig: "Config.js'ni tekshiring:",
-      checkConfigBody: "GITHUB_TOKEN va GIST_ID sozlanganligini tekshiring",
-      errorLabel: "Xatolik:",
-      gistUnavailable: "GitHub Gist'ga ulanib bo'lmadi"
+      connectionTitle: "⚠️ GitHub Gist API bilan bog'lanishda xatolik.",
+      source: "Ma'lumotlar bevosita GitHub Gist'dan olinadi.",
+      checkConfig: "config.js faylini tekshiring:",
+      checkConfigBody: "GITHUB_TOKEN va GIST_ID qiymatlari to'g'ri sozlanganligini tekshiring",
+      errorLabel: "Xatolik tafsiloti:",
+      gistUnavailable: "GitHub Gist'ga ulanish amalga oshmadi"
     },
     csv: {
-      noData: "Yuklab oladigan javoblar yo'q",
-      header: "Sana,Foydalanuvchi ID,Savol ID,Javob\n"
+      noData: "Yuklab olish uchun ma'lumot mavjud emas",
+      header: "Sana,Foydalanuvchi identifikatori,Savol ID,Javob\n"
     }
   },
   en: {
     title: "AI Resistance Survey Results Dashboard",
-    subtitle: "Analysis of internal resistance to AI adoption in uranium mining.",
-    meta: "This dashboard is intended for thesis reviewers only.",
-    badge: "Thesis Review",
+    subtitle: "Research findings on internal resistance to AI adoption in the uranium mining sector.",
+    meta: "This panel is intended for thesis review and academic evaluation.",
+    badge: "Academic Review",
     sections: {
-      summary: "Summary",
-      questions: "Question Breakdown",
+      summary: "Overall Indicators",
+      questions: "Question-Level Analysis",
       responses: "All Responses"
     },
     labels: {
-      participants: "Total participants",
-      responses: "Total responses",
-      lastUpdate: "Last updated"
+      participants: "Number of participants",
+      responses: "Number of responses",
+      lastUpdate: "Last update"
     },
     actions: {
-      downloadCsv: "Download CSV"
+      downloadCsv: "Download as CSV"
     },
     note: {
       label: "Note:",
-      text: "Dashboard refreshes automatically every 5 seconds."
+      text: "Data refreshes automatically every 5 seconds."
     },
     states: {
-      loading: "Loading...",
-      noData: "No responses yet"
+      loading: "Loading data...",
+      noData: "No data available"
     },
     questionLabel: "Question",
     countUnit: "responses",
     table: {
       date: "Date",
-      userId: "User ID",
-      answers: "Answers"
+      userId: "User identifier",
+      answers: "Responses"
     },
     errors: {
-      connectionTitle: "⚠️ GitHub Gist API connection error.",
-      source: "Data is fetched directly from GitHub Gist.",
+      connectionTitle: "⚠️ Error connecting to the GitHub Gist API.",
+      source: "Data is retrieved directly from GitHub Gist.",
       checkConfig: "Check config.js:",
-      checkConfigBody: "Ensure GITHUB_TOKEN and GIST_ID are configured",
-      errorLabel: "Error:",
-      gistUnavailable: "Unable to connect to GitHub Gist"
+      checkConfigBody: "Ensure GITHUB_TOKEN and GIST_ID are correctly configured",
+      errorLabel: "Error details:",
+      gistUnavailable: "Could not connect to GitHub Gist"
     },
     csv: {
-      noData: "There are no responses to download",
-      header: "Date,User ID,Question ID,Answer\n"
+      noData: "No data available for download",
+      header: "Date,User identifier,Question ID,Response\n"
     }
   }
 };
