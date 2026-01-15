@@ -12,8 +12,8 @@ let allStats = {};
 const translations = {
   uz: {
     title: "AI Resistance Survey Results Dashboard",
-    subtitle: "Uran qazib olish sohasida sun'iy intellekt joriy etilishiga nisbatan ichki qarshilik bo'yicha tadqiqot natijalari.",
-    meta: "Ushbu panel dissertatsiya (thesis) ekspertizasi doirasida ko'rib chiqish uchun mo'ljallangan.",
+    subtitle: "Uran qazib olish sohasida sun'iy intellektni joriy etishga ichki qarshilik bo'yicha tadqiqot natijalari.",
+    meta: "Ushbu panel dissertatsiya (thesis) ko'rib chiqish va akademik baholash uchun mo'ljallangan.",
     badge: "Ekspertiza",
     sections: {
       summary: "Umumiy Ko'rsatkichlar",
@@ -26,11 +26,12 @@ const translations = {
       lastUpdate: "So'nggi yangilanish"
     },
     actions: {
-      downloadCsv: "CSV formatida yuklab olish"
+      downloadCsv: "CSV formatida yuklab olish",
+      refresh: "Ma'lumotlarni yangilash"
     },
     note: {
       label: "Eslatma:",
-      text: "Ma'lumotlar har 5 soniyada avtomatik yangilanadi."
+      text: "Ma'lumotlar sahifa yangilanganda yangilanadi."
     },
     states: {
       loading: "Ma'lumotlar yuklanmoqda...",
@@ -76,11 +77,12 @@ const translations = {
       lastUpdate: "Last update"
     },
     actions: {
-      downloadCsv: "Download as CSV"
+      downloadCsv: "Download as CSV",
+      refresh: "Refresh data"
     },
     note: {
       label: "Note:",
-      text: "Data refreshes automatically every 5 seconds."
+      text: "Data updates when the page is refreshed."
     },
     states: {
       loading: "Loading data...",
@@ -146,6 +148,7 @@ function applyTranslations() {
   const labelResponses = document.getElementById("labelResponses");
   const labelLastUpdate = document.getElementById("labelLastUpdate");
   const downloadCsvBtn = document.getElementById("downloadCsvBtn");
+  const refreshBtn = document.getElementById("refreshBtn");
   const noteLabel = document.getElementById("noteLabel");
   const noteText = document.getElementById("noteText");
 
@@ -160,6 +163,7 @@ function applyTranslations() {
   if (labelResponses) labelResponses.innerText = t.labels.responses;
   if (labelLastUpdate) labelLastUpdate.innerText = t.labels.lastUpdate;
   if (downloadCsvBtn) downloadCsvBtn.innerText = t.actions.downloadCsv;
+  if (refreshBtn) refreshBtn.innerText = t.actions.refresh;
   if (noteLabel) noteLabel.innerText = t.note.label;
   if (noteText) noteText.innerText = t.note.text;
 
@@ -182,8 +186,14 @@ function setLanguage(lang) {
 function initLanguageControls() {
   const langUzButton = document.getElementById("langUz");
   const langEnButton = document.getElementById("langEn");
+  const refreshButton = document.getElementById("refreshBtn");
   if (langUzButton) langUzButton.addEventListener("click", () => setLanguage("uz"));
   if (langEnButton) langEnButton.addEventListener("click", () => setLanguage("en"));
+  if (refreshButton) refreshButton.addEventListener("click", refreshData);
+}
+
+function refreshData() {
+  loadData();
 }
 
 if (document.readyState === "loading") {
@@ -510,5 +520,4 @@ function updateLastUpdate() {
 // Boshlang'ich yuklash
 loadData();
 
-// Har 5 soniyada yangilash
-setInterval(loadData, 5000);
+// Auto-refresh olib tashlandi
