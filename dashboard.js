@@ -10,6 +10,9 @@ let allResponses = [];
 let allStats = {};
 
 const translations = {
+/* ================= RESISTANCE INDEX HELPERS ================= */
+
+
   uz: {
     title: "AI Resistance Survey Results Dashboard",
     subtitle: "Uran qazib olish sohasida sun'iy intellektni joriy etishga ichki qarshilik bo'yicha tadqiqot natijalari.",
@@ -121,7 +124,85 @@ const translations = {
     }
   }
 };
+function toIndex(score, max) {
+  if (!max || isNaN(score)) return 0;
+  return Math.round((score / max) * 100);
+}
 
+function interpretIndex(value, lang = "uz") {
+  const labels = {
+    uz: [
+      "Qarshilik deyarli yo‘q",
+      "Past qarshilik",
+      "O‘rtacha qarshilik",
+      "Yuqori qarshilik",
+      "Juda yuqori qarshilik"
+    ],
+    en: [
+      "Very low resistance",
+      "Low resistance",
+      "Moderate resistance",
+      "High resistance",
+      "Very high resistance"
+    ]
+  };
+
+  const l = labels[lang] || labels.uz;
+  if (value <= 20) return l[0];
+  if (value <= 40) return l[1];
+  if (value <= 60) return l[2];
+  if (value <= 80) return l[3];
+  return l[4];
+}
+
+function indexColor(value) {
+  if (value <= 20) return "#2e7d32";
+  if (value <= 40) return "#c0ca33";
+  if (value <= 60) return "#fb8c00";
+  return "#c62828";
+}
+function calculateResistanceIndices() {
+  if (!allResponses || allResponses.length === 0) return null;
+
+  let leadership = 0;
+  let core = 0;
+  let readiness = 0;
+  let count = 0;
+
+  allResponses.forEach(r => {
+    const qId = String(r.question_id);
+    const answer = r.answer;
+
+    if (!answer || !answer.id) return;
+
+    const val = parseInt(answer.id, 10);
+    if (isNaN(val)) return;
+
+    // Leadership block: Q5–Q7
+    if (["5", "6", "7"].includes(qId)) {
+      leadership += val;
+      count++;
+    }
+
+    // Core block: Q3–Q4 + Q12
+    if (["3", "4", "12"].includes(qId)) {
+      core += val;
+      count++;
+    }
+
+    // Readiness block: Q8–Q11
+    if (["8", "9", "10", "11"].includes(qId)) {
+      readiness += val;
+      count++;
+    }
+  });
+
+  return {
+    leadershipIndex: toIndex(leadership, 15),
+    coreIndex: toIndex(core, 15),
+    readinessIndex: toIndex(readiness, 20)
+  };
+}
 function getQuestions() {
   if (typeof questions === "undefined") {
     return [];
@@ -395,6 +476,32 @@ function updateDashboard() {
 
   // Javoblarni ko'rsatish
   displayResponses();
+
+  /* ===== Resistance Index Rendering ===== */
+
+  const indices = calculateResistanceIndices();
+  if (!indices) return;
+
+  const { leadershipIndex, coreIndex, readinessIndex } = indices;
+  const overallIndex = Math.round(
+    (leadershipIndex + coreIndex + readinessIndex) / 3
+  );
+
+  const lang = currentLang || "uz";
+
+  const bind = (id, value, labelId) => {
+    const el = document.getElementById(id);
+    const lbl = document.getElementById(labelId);
+    if (!el || !lbl) return;
+    el.innerText = value + "%";
+    el.style.color = indexColor(value);
+    lbl.innerText = interpretIndex(value, lang);
+  };
+
+  bind("leadershipIndex", leadershipIndex, "leadershipLabel");
+  bind("coreIndex", coreIndex, "coreLabel");
+  bind("readinessIndex", readinessIndex, "readinessLabel");
+  bind("overallIndex", overallIndex, "overallLabel");
 }
 
 // Savollar bo'yicha statistika
