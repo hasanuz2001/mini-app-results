@@ -36,25 +36,29 @@ const questions = [
       "\"Navoiyuran\" Davlat korxonasida",
       "\"Nurliqum mining\" MChJda",
       "Tog' kon sanoati va geologiya vazirligida",
-      "Uranga taluqli sohada ishlayman"
+      "Uranga taluqli sohada ishlayman",
+      "Men uran sohasida ishlamayman."
     ],
     uz_cyrl: [
       "\"Навоийуран\" давлат корхонасида",
       "\"Нурлиқум майнинг\" МЧЖда",
       "Тоғ-кон саноати ва геология вазирлигида",
-      "Уранга тааллуқли соҳада ишлайман"
+      "Уранга тааллуқли соҳада ишлайман",
+      "Мен уран соҳасида ишламайман."
     ],
     ru: [
       "В государственном предприятии \"Навоийуран\"",
       "В ООО \"Nurliqum mining\"",
       "В Министерстве горнодобывающей промышленности и геологии",
-      "Работаю в сфере, связанной с ураном"
+      "Работаю в сфере, связанной с ураном",
+      "Я не работаю в урановой отрасли."
     ],
     en: [
       "At \"Navoiyuran\" State Enterprise",
       "At \"Nurliqum mining\" LLC",
       "At the Ministry of Mining Industry and Geology",
-      "I work in a uranium-related field"
+      "I work in a uranium-related field",
+      "I do not work in the uranium sector."
     ]
   },
   index: false
