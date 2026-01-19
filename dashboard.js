@@ -164,10 +164,16 @@ function indexColor(value) {
 function calculateResistanceIndices() {
   if (!allResponses || allResponses.length === 0) return null;
 
-  let leadership = 0;
-  let core = 0;
-  let readiness = 0;
-  let count = 0;
+  let leadershipSum = 0;
+  let coreSum = 0;
+  let readinessSum = 0;
+
+  // Count unique respondents
+  const respondentSet = new Set();
+  allResponses.forEach(r => {
+    respondentSet.add(r.user_id);
+  });
+  const respondentCount = respondentSet.size || 1;
 
   allResponses.forEach(r => {
     const qId = String(r.question_id);
@@ -178,29 +184,31 @@ function calculateResistanceIndices() {
     const val = parseInt(answer.id, 10);
     if (isNaN(val)) return;
 
-    // Leadership block: Q5–Q7
+    // Leadership: Q5–Q7 (max per respondent = 15)
     if (["5", "6", "7"].includes(qId)) {
-      leadership += val;
-      count++;
+      leadershipSum += val;
     }
 
-    // Core block: Q3–Q4 + Q12
+    // Core: Q3, Q4, Q12 (max per respondent = 15)
     if (["3", "4", "12"].includes(qId)) {
-      core += val;
-      count++;
+      coreSum += val;
     }
 
-    // Readiness block: Q8–Q11
+    // Readiness: Q8–Q11 (4 questions × 5 = 20)
     if (["8", "9", "10", "11"].includes(qId)) {
-      readiness += val;
-      count++;
+      readinessSum += val;
     }
   });
 
+  // AVERAGE per respondent
+  const leadershipAvg = leadershipSum / respondentCount;
+  const coreAvg = coreSum / respondentCount;
+  const readinessAvg = readinessSum / respondentCount;
+
   return {
-    leadershipIndex: toIndex(leadership, 15),
-    coreIndex: toIndex(core, 15),
-    readinessIndex: toIndex(readiness, 20)
+    leadershipIndex: toIndex(leadershipAvg, 15),
+    coreIndex: toIndex(coreAvg, 15),
+    readinessIndex: toIndex(readinessAvg, 20)
   };
 }
 function getQuestions() {
