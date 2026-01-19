@@ -31,46 +31,55 @@
     </header>
     <!-- RESISTANCE INDEX -->
     <div class="card">
-      <h2>Resistance Index (0–100)</h2>
+      <h2 id="resistanceTitle">Resistance Index (0–100)</h2>
       <div class="metrics">
         <div>
-          <p class="label">Overall Resistance</p>
+          <p class="label"><span id="labelOverallResistance">Overall Resistance</span></p>
           <h3 id="overallIndex" class="metric-value">–</h3>
           <p id="overallLabel" class="metric-note"></p>
         </div>
         <div>
-          <p class="label">Leadership Resistance</p>
+          <p class="label"><span id="labelLeadershipResistance">Leadership Resistance</span></p>
           <h3 id="leadershipIndex" class="metric-value">–</h3>
           <p id="leadershipLabel" class="metric-note"></p>
         </div>
         <div>
-          <p class="label">Core Resistance</p>
+          <p class="label"><span id="labelCoreResistance">Core Resistance</span></p>
           <h3 id="coreIndex" class="metric-value">–</h3>
           <p id="coreLabel" class="metric-note"></p>
         </div>
         <div>
-          <p class="label">Readiness Resistance</p>
+          <p class="label"><span id="labelReadinessResistance">Readiness Resistance</span></p>
           <h3 id="readinessIndex" class="metric-value">–</h3>
           <p id="readinessLabel" class="metric-note"></p>
         </div>
         <div class="card">
-          <h3>Resistance Dimensions</h3>
+          <h3 id="resistanceDimensionsTitle">Resistance Dimensions</h3>
           <ul style="font-size:14px; line-height:1.6;">
-            <li><strong>Leadership Resistance:</strong> Rahbariyatning sun’iy intellektga nisbatan pozitsiyasi, ishonchi va kommunikatsiyasi.</li>
-            <li><strong>Core Resistance:</strong> Xodimlarning ishonchi, qo‘rquvlari va texnologiyaga munosabati.</li>
-            <li><strong>Readiness Resistance:</strong> Trening, raqamli ko‘nikmalar va institutsional tayyorgarlik darajasi.</li>
+            <li>
+              <strong id="resistanceDimensionLeadershipLabel">Leadership Resistance:</strong>
+              <span id="resistanceDimensionLeadershipText">Rahbariyatning sun’iy intellektga nisbatan pozitsiyasi, ishonchi va kommunikatsiyasi.</span>
+            </li>
+            <li>
+              <strong id="resistanceDimensionCoreLabel">Core Resistance:</strong>
+              <span id="resistanceDimensionCoreText">Xodimlarning ishonchi, qo‘rquvlari va texnologiyaga munosabati.</span>
+            </li>
+            <li>
+              <strong id="resistanceDimensionReadinessLabel">Readiness Resistance:</strong>
+              <span id="resistanceDimensionReadinessText">Trening, raqamli ko‘nikmalar va institutsional tayyorgarlik darajasi.</span>
+            </li>
           </ul>
         </div>
       </div>
     </div>
     <div class="card" style="background:#fafafa;">
-      <h3>Resistance Index Legend</h3>
+      <h3 id="resistanceLegendTitle">Resistance Index Legend</h3>
       <ul style="list-style:none; padding-left:0; font-size:14px;">
-        <li><span style="color:#2e7d32;font-weight:bold;">●</span> 0–20 — Qarshilik deyarli yo‘q</li>
-        <li><span style="color:#c0ca33;font-weight:bold;">●</span> 21–40 — Past qarshilik</li>
-        <li><span style="color:#fb8c00;font-weight:bold;">●</span> 41–60 — O‘rtacha qarshilik</li>
-        <li><span style="color:#c62828;font-weight:bold;">●</span> 61–80 — Yuqori qarshilik</li>
-        <li><span style="color:#8e0000;font-weight:bold;">●</span> 81–100 — Juda yuqori qarshilik</li>
+        <li><span style="color:#2e7d32;font-weight:bold;">●</span> <span id="resistanceLegend1">0–20 — Qarshilik deyarli yo‘q</span></li>
+        <li><span style="color:#c0ca33;font-weight:bold;">●</span> <span id="resistanceLegend2">21–40 — Past qarshilik</span></li>
+        <li><span style="color:#fb8c00;font-weight:bold;">●</span> <span id="resistanceLegend3">41–60 — O‘rtacha qarshilik</span></li>
+        <li><span style="color:#c62828;font-weight:bold;">●</span> <span id="resistanceLegend4">61–80 — Yuqori qarshilik</span></li>
+        <li><span style="color:#8e0000;font-weight:bold;">●</span> <span id="resistanceLegend5">81–100 — Juda yuqori qarshilik</span></li>
       </ul>
     </div>
 
@@ -131,16 +140,12 @@
       </div>
     </div>
 <div class="card" style="border-left:5px solid #2a9df4;">
-  <h3>Methodological Note</h3>
+  <h3 id="methodNoteTitle">Methodological Note</h3>
   <p style="font-size:14px; line-height:1.6; color:#333;">
-    Resistance Index 5 ballik Likert shkalasi asosida hisoblandi.
-    Leadership, Core va Readiness yo‘nalishlari bo‘yicha savollar yig‘indi ballari
-    maksimal mumkin bo‘lgan ballga nisbatan normallashtirilib,
-    0–100 indeks shakliga keltirildi.
+    <span id="methodNoteBody1">Resistance Index 5 ballik Likert shkalasi asosida hisoblandi. Leadership, Core va Readiness yo‘nalishlari bo‘yicha savollar yig‘indi ballari maksimal mumkin bo‘lgan ballga nisbatan normallashtirilib, 0–100 indeks shakliga keltirildi.</span>
   </p>
   <p style="font-size:13px; color:#555;">
-    Yuqori indeks qiymati sun’iy intellektni joriy etishga nisbatan kuchliroq
-    tashkiliy va psixologik qarshilikni anglatadi.
+    <span id="methodNoteBody2">Yuqori indeks qiymati sun’iy intellektni joriy etishga nisbatan kuchliroq tashkiliy va psixologik qarshilikni anglatadi.</span>
   </p>
 </div>
     <div class="note">

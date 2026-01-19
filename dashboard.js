@@ -36,6 +36,39 @@ const translations = {
       downloadCsv: "CSV formatida yuklab olish",
       refresh: "Ma'lumotlarni yangilash"
     },
+    resistance: {
+      title: "Qarshilik indeksi (0–100)",
+      labels: {
+        overall: "Umumiy qarshilik",
+        leadership: "Rahbariyat qarshiligi",
+        core: "Asosiy qarshilik",
+        readiness: "Tayyorgarlik qarshiligi"
+      },
+      dimensions: {
+        title: "Qarshilik yo‘nalishlari",
+        leadershipLabel: "Rahbariyat qarshiligi:",
+        leadershipText: "Rahbariyatning sun’iy intellektga nisbatan pozitsiyasi, ishonchi va kommunikatsiyasi.",
+        coreLabel: "Asosiy qarshilik:",
+        coreText: "Xodimlarning ishonchi, qo‘rquvlari va texnologiyaga munosabati.",
+        readinessLabel: "Tayyorgarlik qarshiligi:",
+        readinessText: "Trening, raqamli ko‘nikmalar va institutsional tayyorgarlik darajasi."
+      },
+      legend: {
+        title: "Qarshilik indeksi shkalasi",
+        items: [
+          "0–20 — Qarshilik deyarli yo‘q",
+          "21–40 — Past qarshilik",
+          "41–60 — O‘rtacha qarshilik",
+          "61–80 — Yuqori qarshilik",
+          "81–100 — Juda yuqori qarshilik"
+        ]
+      },
+      methodNote: {
+        title: "Metodologik izoh",
+        body1: "Qarshilik indeksi 5 ballik Likert shkalasi asosida hisoblandi. Leadership, Core va Readiness yo‘nalishlari bo‘yicha savollar yig‘indi ballari maksimal mumkin bo‘lgan ballga nisbatan normallashtirilib, 0–100 indeks shakliga keltirildi.",
+        body2: "Yuqori indeks qiymati sun’iy intellektni joriy etishga nisbatan kuchliroq tashkiliy va psixologik qarshilikni anglatadi."
+      }
+    },
     note: {
       label: "Eslatma:",
       text: "Ma'lumotlar sahifa yangilanganda yangilanadi."
@@ -90,6 +123,39 @@ const translations = {
     actions: {
       downloadCsv: "Download as CSV",
       refresh: "Refresh data"
+    },
+    resistance: {
+      title: "Resistance Index (0–100)",
+      labels: {
+        overall: "Overall Resistance",
+        leadership: "Leadership Resistance",
+        core: "Core Resistance",
+        readiness: "Readiness Resistance"
+      },
+      dimensions: {
+        title: "Resistance Dimensions",
+        leadershipLabel: "Leadership Resistance:",
+        leadershipText: "Leadership stance, trust, and communication around AI adoption.",
+        coreLabel: "Core Resistance:",
+        coreText: "Employee trust, fears, and attitudes toward technology.",
+        readinessLabel: "Readiness Resistance:",
+        readinessText: "Training, digital skills, and institutional preparedness level."
+      },
+      legend: {
+        title: "Resistance Index Legend",
+        items: [
+          "0–20 — Very low resistance",
+          "21–40 — Low resistance",
+          "41–60 — Moderate resistance",
+          "61–80 — High resistance",
+          "81–100 — Very high resistance"
+        ]
+      },
+      methodNote: {
+        title: "Methodological Note",
+        body1: "The Resistance Index is calculated using a 5-point Likert scale. Question totals for Leadership, Core, and Readiness are normalized against the maximum possible score and converted to a 0–100 index.",
+        body2: "Higher index values indicate stronger organizational and psychological resistance to AI adoption."
+      }
     },
     note: {
       label: "Note:",
@@ -252,6 +318,27 @@ function applyTranslations() {
   const refreshBtn = document.getElementById("refreshBtn");
   const noteLabel = document.getElementById("noteLabel");
   const noteText = document.getElementById("noteText");
+  const resistanceTitle = document.getElementById("resistanceTitle");
+  const labelOverallResistance = document.getElementById("labelOverallResistance");
+  const labelLeadershipResistance = document.getElementById("labelLeadershipResistance");
+  const labelCoreResistance = document.getElementById("labelCoreResistance");
+  const labelReadinessResistance = document.getElementById("labelReadinessResistance");
+  const resistanceDimensionsTitle = document.getElementById("resistanceDimensionsTitle");
+  const resistanceDimensionLeadershipLabel = document.getElementById("resistanceDimensionLeadershipLabel");
+  const resistanceDimensionLeadershipText = document.getElementById("resistanceDimensionLeadershipText");
+  const resistanceDimensionCoreLabel = document.getElementById("resistanceDimensionCoreLabel");
+  const resistanceDimensionCoreText = document.getElementById("resistanceDimensionCoreText");
+  const resistanceDimensionReadinessLabel = document.getElementById("resistanceDimensionReadinessLabel");
+  const resistanceDimensionReadinessText = document.getElementById("resistanceDimensionReadinessText");
+  const resistanceLegendTitle = document.getElementById("resistanceLegendTitle");
+  const resistanceLegend1 = document.getElementById("resistanceLegend1");
+  const resistanceLegend2 = document.getElementById("resistanceLegend2");
+  const resistanceLegend3 = document.getElementById("resistanceLegend3");
+  const resistanceLegend4 = document.getElementById("resistanceLegend4");
+  const resistanceLegend5 = document.getElementById("resistanceLegend5");
+  const methodNoteTitle = document.getElementById("methodNoteTitle");
+  const methodNoteBody1 = document.getElementById("methodNoteBody1");
+  const methodNoteBody2 = document.getElementById("methodNoteBody2");
 
   if (heroTitle) heroTitle.innerText = t.title;
   if (heroSubtitle) heroSubtitle.innerText = t.subtitle;
@@ -271,6 +358,27 @@ function applyTranslations() {
   if (refreshBtn) refreshBtn.innerText = t.actions.refresh;
   if (noteLabel) noteLabel.innerText = t.note.label;
   if (noteText) noteText.innerText = t.note.text;
+  if (resistanceTitle) resistanceTitle.innerText = t.resistance.title;
+  if (labelOverallResistance) labelOverallResistance.innerText = t.resistance.labels.overall;
+  if (labelLeadershipResistance) labelLeadershipResistance.innerText = t.resistance.labels.leadership;
+  if (labelCoreResistance) labelCoreResistance.innerText = t.resistance.labels.core;
+  if (labelReadinessResistance) labelReadinessResistance.innerText = t.resistance.labels.readiness;
+  if (resistanceDimensionsTitle) resistanceDimensionsTitle.innerText = t.resistance.dimensions.title;
+  if (resistanceDimensionLeadershipLabel) resistanceDimensionLeadershipLabel.innerText = t.resistance.dimensions.leadershipLabel;
+  if (resistanceDimensionLeadershipText) resistanceDimensionLeadershipText.innerText = t.resistance.dimensions.leadershipText;
+  if (resistanceDimensionCoreLabel) resistanceDimensionCoreLabel.innerText = t.resistance.dimensions.coreLabel;
+  if (resistanceDimensionCoreText) resistanceDimensionCoreText.innerText = t.resistance.dimensions.coreText;
+  if (resistanceDimensionReadinessLabel) resistanceDimensionReadinessLabel.innerText = t.resistance.dimensions.readinessLabel;
+  if (resistanceDimensionReadinessText) resistanceDimensionReadinessText.innerText = t.resistance.dimensions.readinessText;
+  if (resistanceLegendTitle) resistanceLegendTitle.innerText = t.resistance.legend.title;
+  if (resistanceLegend1) resistanceLegend1.innerText = t.resistance.legend.items[0];
+  if (resistanceLegend2) resistanceLegend2.innerText = t.resistance.legend.items[1];
+  if (resistanceLegend3) resistanceLegend3.innerText = t.resistance.legend.items[2];
+  if (resistanceLegend4) resistanceLegend4.innerText = t.resistance.legend.items[3];
+  if (resistanceLegend5) resistanceLegend5.innerText = t.resistance.legend.items[4];
+  if (methodNoteTitle) methodNoteTitle.innerText = t.resistance.methodNote.title;
+  if (methodNoteBody1) methodNoteBody1.innerText = t.resistance.methodNote.body1;
+  if (methodNoteBody2) methodNoteBody2.innerText = t.resistance.methodNote.body2;
 
   const langUz = document.getElementById("langUz");
   const langEn = document.getElementById("langEn");
