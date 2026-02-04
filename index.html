@@ -27,6 +27,7 @@
           <button id="langEn" type="button" class="btn-secondary" onclick="setLanguage('en')">EN</button>
         </div>
         <button id="refreshBtn" type="button" class="btn-secondary">Ma'lumotlarni yangilash</button>
+        <p id="lastUpdate" class="hero-last-update" style="margin:8px 0 0;font-size:13px;color:#64748b;">Yuklanmoqda...</p>
       </div>
     </header>
     <!-- RESISTANCE INDEX -->
@@ -105,10 +106,6 @@
           <p id="labelResponses" class="label">Jami javoblar</p>
           <h3 id="totalResponses" class="metric-value">0</h3>
         </div>
-        <div>
-          <p id="labelLastUpdate" class="label">Yangilanish vaqti</p>
-          <p id="lastUpdate" class="metric-note">Yuklanmoqda...</p>
-        </div>
       </div>
     </div>
 
@@ -139,16 +136,6 @@
       </div>
     </div>
 
-    <!-- Javoblar Ro'yxati -->
-    <div class="card">
-      <h2 id="sectionResponsesTitle">Barcha Javoblar</h2>
-      <div class="actions">
-        <button id="downloadCsvBtn" class="btn-primary" onclick="downloadCSV()">CSV yuklab olish</button>
-      </div>
-      <div id="responsesList" style="max-height: 600px; overflow-y: auto;">
-        <p style="text-align: center; color: #999;">Yuklanmoqda...</p>
-      </div>
-    </div>
 <div class="card" style="border-left:5px solid #2a9df4;">
   <h3 id="methodNoteTitle">Metodologik izoh</h3>
   <p style="font-size:14px; line-height:1.6; color:#333;">

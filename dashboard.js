@@ -21,8 +21,7 @@ const translations = {
     sections: {
       summary: "Umumiy Ko'rsatkichlar",
       languages: "Til bo'yicha taqsimot",
-      questions: "Savollar Bo'yicha Tahlil",
-      responses: "Barcha Javoblar"
+      questions: "Savollar Bo'yicha Tahlil"
     },
     labels: {
       participants: "Ishtirokchilar soni",
@@ -33,7 +32,6 @@ const translations = {
       langEn: "English"
     },
     actions: {
-      downloadCsv: "CSV formatida yuklab olish",
       refresh: "Ma'lumotlarni yangilash"
     },
     resistance: {
@@ -100,10 +98,6 @@ const translations = {
       checkConfigBody: "GITHUB_TOKEN va GIST_ID qiymatlari to'g'ri sozlanganligini tekshiring",
       errorLabel: "Xatolik tafsiloti:",
       gistUnavailable: "GitHub Gist'ga ulanish amalga oshmadi"
-    },
-    csv: {
-      noData: "Yuklab olish uchun ma'lumot mavjud emas",
-      header: "Sana,Foydalanuvchi identifikatori,Savol ID,Javob\n"
     }
   },
   en: {
@@ -114,8 +108,7 @@ const translations = {
     sections: {
       summary: "Overall Indicators",
       languages: "Language breakdown",
-      questions: "Question-Level Analysis",
-      responses: "All Responses"
+      questions: "Question-Level Analysis"
     },
     labels: {
       participants: "Number of participants",
@@ -126,7 +119,6 @@ const translations = {
       langEn: "English"
     },
     actions: {
-      downloadCsv: "Download as CSV",
       refresh: "Refresh data"
     },
     resistance: {
@@ -193,10 +185,6 @@ const translations = {
       checkConfigBody: "Ensure GITHUB_TOKEN and GIST_ID are correctly configured",
       errorLabel: "Error details:",
       gistUnavailable: "Could not connect to GitHub Gist"
-    },
-    csv: {
-      noData: "No data available for download",
-      header: "Date,User identifier,Question ID,Response\n"
     }
   }
 };
@@ -370,14 +358,12 @@ function applyTranslations() {
   const sectionSummaryTitle = document.getElementById("sectionSummaryTitle");
   const sectionLanguagesTitle = document.getElementById("sectionLanguagesTitle");
   const sectionQuestionsTitle = document.getElementById("sectionQuestionsTitle");
-  const sectionResponsesTitle = document.getElementById("sectionResponsesTitle");
   const labelParticipants = document.getElementById("labelParticipants");
   const labelResponses = document.getElementById("labelResponses");
   const labelLastUpdate = document.getElementById("labelLastUpdate");
   const labelLangUzCombined = document.getElementById("labelLangUzCombined");
   const labelLangRu = document.getElementById("labelLangRu");
   const labelLangEn = document.getElementById("labelLangEn");
-  const downloadCsvBtn = document.getElementById("downloadCsvBtn");
   const refreshBtn = document.getElementById("refreshBtn");
   const noteLabel = document.getElementById("noteLabel");
   const noteText = document.getElementById("noteText");
@@ -411,14 +397,12 @@ function applyTranslations() {
   if (sectionSummaryTitle) sectionSummaryTitle.innerText = t.sections.summary;
   if (sectionLanguagesTitle) sectionLanguagesTitle.innerText = t.sections.languages;
   if (sectionQuestionsTitle) sectionQuestionsTitle.innerText = t.sections.questions;
-  if (sectionResponsesTitle) sectionResponsesTitle.innerText = t.sections.responses;
   if (labelParticipants) labelParticipants.innerText = t.labels.participants;
   if (labelResponses) labelResponses.innerText = t.labels.responses;
   if (labelLastUpdate) labelLastUpdate.innerText = t.labels.lastUpdate;
   if (labelLangUzCombined) labelLangUzCombined.innerText = t.labels.langUzCombined;
   if (labelLangRu) labelLangRu.innerText = t.labels.langRu;
   if (labelLangEn) labelLangEn.innerText = t.labels.langEn;
-  if (downloadCsvBtn) downloadCsvBtn.innerText = t.actions.downloadCsv;
   if (refreshBtn) refreshBtn.innerText = t.actions.refresh;
   if (noteLabel) noteLabel.innerText = t.note.label;
   if (noteText) noteText.innerText = t.note.text;
@@ -513,12 +497,8 @@ async function loadData() {
     console.log("GitHub Gist'dan ma'lumotlar yuklanmoqda...");
     const t = translations[currentLang] || translations.uz;
     const statsEl = document.getElementById("questionsStats");
-    const responsesEl = document.getElementById("responsesList");
     if (statsEl) {
       statsEl.innerHTML = `<p style="text-align: center; color: #999;">${t.states.loading}</p>`;
-    }
-    if (responsesEl) {
-      responsesEl.innerHTML = `<p style="text-align: center; color: #999;">${t.states.loading}</p>`;
     }
     
     // Token va Gist ID tekshirish
@@ -630,7 +610,6 @@ async function loadData() {
     document.getElementById("totalCount").innerText = "0";
     document.getElementById("totalResponses").innerText = "0";
     document.getElementById("questionsStats").innerHTML = `<p style="color: #d32f2f; padding: 15px; background: #ffebee; border-radius: 5px;">${message}</p>`;
-    document.getElementById("responsesList").innerHTML = `<p style="text-align: center; color: #999;">${t.errors.gistUnavailable}</p>`;
   }
 }
 
@@ -654,9 +633,6 @@ function updateDashboard() {
 
   // Savollar statistikasi
   displayQuestionStats();
-
-  // Javoblarni ko'rsatish
-  displayResponses();
 
   /* ===== Resistance Index Rendering ===== */
 
@@ -906,92 +882,16 @@ function renderAnswerRow(label, count, totalForQuestion, t) {
   `;
 }
 
-// Javoblarni ko'rsatish
-function displayResponses() {
-  const t = translations[currentLang] || translations.uz;
-  const list = document.getElementById("responsesList");
-
-  if (allResponses.length === 0) {
-    list.innerHTML = `<p style="text-align: center; color: #999;">${t.states.noData}</p>`;
-    return;
-  }
-
-  // Foydalanuvchilar bo'yicha yig'ish
-  const byUser = {};
-  allResponses.forEach(row => {
-    if (!byUser[row.user_id]) {
-      byUser[row.user_id] = {
-        user_id: row.user_id,
-        timestamp: row.timestamp,
-        answers: {}
-      };
-    }
-    byUser[row.user_id].answers[row.question_id] = row.answer;
-  });
-
-  let html = '<table style="width: 100%; border-collapse: collapse;">';
-  html += '<tr style="background: #2a9df4; color: white;">';
-  html += `<th style="padding: 10px; text-align: left; border: 1px solid #ddd;">${t.table.date}</th>`;
-  html += `<th style="padding: 10px; text-align: left; border: 1px solid #ddd;">${t.table.userId}</th>`;
-  html += `<th style="padding: 10px; text-align: left; border: 1px solid #ddd;">${t.table.answers}</th>`;
-  html += '</tr>';
-
-  Object.values(byUser).slice(-50).reverse().forEach((user, idx) => {
-    const bgColor = idx % 2 === 0 ? '#f9f9f9' : 'white';
-    const answerCount = Object.keys(user.answers).length;
-    
-    html += `<tr style="background: ${bgColor};">`;
-    html += `<td style="padding: 10px; border: 1px solid #ddd;">${new Date(user.timestamp).toLocaleString(localeMap[currentLang] || "uz-UZ")}</td>`;
-    html += `<td style="padding: 10px; border: 1px solid #ddd;">${user.user_id.substring(0, 8)}</td>`;
-    html += `<td style="padding: 10px; border: 1px solid #ddd;">${answerCount} ${t.countUnit}</td>`;
-    html += '</tr>';
-  });
-
-  html += '</table>';
-  list.innerHTML = html;
-}
-
-// CSV yuklab olish
-function downloadCSV() {
-  const t = translations[currentLang] || translations.uz;
-  if (allResponses.length === 0) {
-    alert(t.csv.noData);
-    return;
-  }
-
-  let csv = t.csv.header;
-  
-  allResponses.forEach(row => {
-    csv += `"${row.timestamp}","${row.user_id}","${row.question_id}","${formatAnswerForCsv(row.answer)}"\n`;
-  });
-
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `survey_results_${new Date().toISOString().slice(0, 10)}.csv`;
-  link.click();
-}
-
-function formatAnswerForCsv(answer) {
-  if (!answer) {
-    return "";
-  }
-  if (typeof answer === "string") {
-    return answer;
-  }
-  if (answer.id && typeof answer.text === "string") {
-    return `${answer.id}::${answer.text}`;
-  }
-  if (answer.text) {
-    return String(answer.text);
-  }
-  return JSON.stringify(answer);
-}
-
-// Yakungi yangilash vaqti
+// Ma'lumotlar yangilash tugmasi ostida — so'nggi yangilanish vaqti
 function updateLastUpdate() {
-  const now = new Date().toLocaleString(localeMap[currentLang] || "uz-UZ");
-  document.getElementById("lastUpdate").innerText = now;
+  const el = document.getElementById("lastUpdate");
+  if (!el) return;
+  const d = new Date();
+  const opts = { day: "2-digit", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true };
+  const locale = currentLang === "en" ? "en-GB" : "uz-UZ";
+  const formatted = d.toLocaleString(locale, opts);
+  const prefix = currentLang === "uz" ? "So'nggi yangilanish " : "Last update ";
+  el.innerText = prefix + formatted;
 }
 
 // Boshlang'ich yuklash
