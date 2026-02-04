@@ -633,16 +633,21 @@ function displayQuestionStats() {
 
   let html = "";
   
-  // Savollarni sonli tartibi bilan saralab, ko'rsatish
-  const sortedQuestions = Object.keys(stats).sort((a, b) => parseInt(a) - parseInt(b));
+  // Barcha savollarni questions.js dan olish va ID bo'yicha saralash (faqat javob bor savollar emas)
+  const allQuestionIds = getQuestions()
+    .map((q) => String(q.id))
+    .sort((a, b) => parseInt(a) - parseInt(b));
   
-  sortedQuestions.forEach((qId) => {
-    const answers = stats[qId];
+  allQuestionIds.forEach((qId) => {
+    const answers = stats[qId] || {};
     const totalForQuestion = Object.values(answers).reduce((a, b) => a + b, 0);
     
     const question = findQuestionById(qId);
     const questionText = question?.text?.[currentLang] || question?.text?.uz || `${t.questionLabel} #${qId}`;
-    const questionOptions = question?.options?.[currentLang] || question?.options?.uz || [];
+    let questionOptions = question?.options?.[currentLang] || question?.options?.uz || [];
+    if (question?.resultsExcludeOptions?.length) {
+      questionOptions = questionOptions.filter((opt) => !question.resultsExcludeOptions.includes(opt));
+    }
     const normalizedCounts = new Map();
 
     Object.entries(answers).forEach(([answer, count]) => {
