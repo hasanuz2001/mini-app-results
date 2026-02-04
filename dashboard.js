@@ -37,12 +37,13 @@ const translations = {
       refresh: "Ma'lumotlarni yangilash"
     },
     resistance: {
-      title: "Qarshilik indeksi (0–100)",
+      title: "Umumiy qarshilik indeksi (0–100)",
       labels: {
         overall: "Umumiy qarshilik",
-        leadership: "Rahbariyat qarshiligi",
-        core: "Asosiy qarshilik",
-        readiness: "Tayyorgarlik qarshiligi"
+        yuqori: "Yuqori boshqaruv qarshilik indeksi (0–100)",
+        orta: "O'rta boshqaruv qarshilik indeksi (0–100)",
+        quyi: "Quyi boshqaruv qarshilik indeksi (0–100)",
+        mutaxassis: "Mutaxassis darajasidagi qarshilik indeksi (0–100)"
       },
       dimensions: {
         title: "Qarshilik yo‘nalishlari",
@@ -125,12 +126,13 @@ const translations = {
       refresh: "Refresh data"
     },
     resistance: {
-      title: "Resistance Index (0–100)",
+      title: "Overall Resistance Index (0–100)",
       labels: {
         overall: "Overall Resistance",
-        leadership: "Leadership Resistance",
-        core: "Core Resistance",
-        readiness: "Readiness Resistance"
+        yuqori: "Senior Management Resistance Index (0–100)",
+        orta: "Middle Management Resistance Index (0–100)",
+        quyi: "Lower Management Resistance Index (0–100)",
+        mutaxassis: "Specialist Level Resistance Index (0–100)"
       },
       dimensions: {
         title: "Resistance Dimensions",
@@ -234,7 +236,6 @@ function calculateResistanceIndices() {
   let coreSum = 0;
   let readinessSum = 0;
 
-  // Count unique respondents
   const respondentSet = new Set();
   allResponses.forEach(r => {
     respondentSet.add(r.user_id);
@@ -250,23 +251,17 @@ function calculateResistanceIndices() {
     const val = parseInt(answer.id, 10);
     if (isNaN(val)) return;
 
-    // Leadership: Q5–Q7 (max per respondent = 15)
     if (["5", "6", "7"].includes(qId)) {
       leadershipSum += val;
     }
-
-    // Core: Q3, Q4, Q12 (max per respondent = 15)
     if (["3", "4", "12"].includes(qId)) {
       coreSum += val;
     }
-
-    // Readiness: Q8–Q11 (4 questions × 5 = 20)
     if (["8", "9", "10", "11"].includes(qId)) {
       readinessSum += val;
     }
   });
 
-  // AVERAGE per respondent
   const leadershipAvg = leadershipSum / respondentCount;
   const coreAvg = coreSum / respondentCount;
   const readinessAvg = readinessSum / respondentCount;
@@ -275,6 +270,66 @@ function calculateResistanceIndices() {
     leadershipIndex: toIndex(leadershipAvg, 15),
     coreIndex: toIndex(coreAvg, 15),
     readinessIndex: toIndex(readinessAvg, 20)
+  };
+}
+
+function calculateResistanceIndicesByPosition() {
+  if (!allResponses || allResponses.length === 0) return null;
+
+  const submissionQ16 = new Map();
+  allResponses.forEach(r => {
+    if (String(r.question_id) === "16" && r.answer && r.answer.id) {
+      const key = `${r.user_id}::${r.timestamp}`;
+      submissionQ16.set(key, String(r.answer.id));
+    }
+  });
+
+  const calcForGroup = (submissionKeys) => {
+    const n = submissionKeys.length;
+    if (n === 0) return { overall: null };
+
+    let leadershipSum = 0;
+    let coreSum = 0;
+    let readinessSum = 0;
+    const keysSet = new Set(submissionKeys);
+
+    allResponses.forEach(r => {
+      const key = `${r.user_id}::${r.timestamp}`;
+      if (!keysSet.has(key)) return;
+
+      const qId = String(r.question_id);
+      const answer = r.answer;
+      if (!answer || !answer.id) return;
+
+      const val = parseInt(answer.id, 10);
+      if (isNaN(val)) return;
+
+      if (["5", "6", "7"].includes(qId)) leadershipSum += val;
+      if (["3", "4", "12"].includes(qId)) coreSum += val;
+      if (["8", "9", "10", "11"].includes(qId)) readinessSum += val;
+    });
+
+    const leadershipAvg = leadershipSum / n;
+    const coreAvg = coreSum / n;
+    const readinessAvg = readinessSum / n;
+
+    const li = toIndex(leadershipAvg, 15);
+    const ci = toIndex(coreAvg, 15);
+    const ri = toIndex(readinessAvg, 20);
+    const overall = Math.round((li + ci + ri) / 3);
+    return { overall, leadershipIndex: li, coreIndex: ci, readinessIndex: ri };
+  };
+
+  const byLevel = { "1": [], "2": [], "3": [], "4": [] };
+  submissionQ16.forEach((q16Id, key) => {
+    if (byLevel[q16Id]) byLevel[q16Id].push(key);
+  });
+
+  return {
+    yuqori: calcForGroup(byLevel["1"]),
+    orta: calcForGroup(byLevel["2"]),
+    quyi: calcForGroup(byLevel["3"]),
+    mutaxassis: calcForGroup(byLevel["4"])
   };
 }
 function getQuestions() {
@@ -320,9 +375,10 @@ function applyTranslations() {
   const noteText = document.getElementById("noteText");
   const resistanceTitle = document.getElementById("resistanceTitle");
   const labelOverallResistance = document.getElementById("labelOverallResistance");
-  const labelLeadershipResistance = document.getElementById("labelLeadershipResistance");
-  const labelCoreResistance = document.getElementById("labelCoreResistance");
-  const labelReadinessResistance = document.getElementById("labelReadinessResistance");
+  const labelYuqoriResistance = document.getElementById("labelYuqoriResistance");
+  const labelOrtaResistance = document.getElementById("labelOrtaResistance");
+  const labelQuyiResistance = document.getElementById("labelQuyiResistance");
+  const labelMutaxassisResistance = document.getElementById("labelMutaxassisResistance");
   const resistanceDimensionsTitle = document.getElementById("resistanceDimensionsTitle");
   const resistanceDimensionLeadershipLabel = document.getElementById("resistanceDimensionLeadershipLabel");
   const resistanceDimensionLeadershipText = document.getElementById("resistanceDimensionLeadershipText");
@@ -360,9 +416,10 @@ function applyTranslations() {
   if (noteText) noteText.innerText = t.note.text;
   if (resistanceTitle) resistanceTitle.innerText = t.resistance.title;
   if (labelOverallResistance) labelOverallResistance.innerText = t.resistance.labels.overall;
-  if (labelLeadershipResistance) labelLeadershipResistance.innerText = t.resistance.labels.leadership;
-  if (labelCoreResistance) labelCoreResistance.innerText = t.resistance.labels.core;
-  if (labelReadinessResistance) labelReadinessResistance.innerText = t.resistance.labels.readiness;
+  if (labelYuqoriResistance) labelYuqoriResistance.innerText = t.resistance.labels.yuqori;
+  if (labelOrtaResistance) labelOrtaResistance.innerText = t.resistance.labels.orta;
+  if (labelQuyiResistance) labelQuyiResistance.innerText = t.resistance.labels.quyi;
+  if (labelMutaxassisResistance) labelMutaxassisResistance.innerText = t.resistance.labels.mutaxassis;
   if (resistanceDimensionsTitle) resistanceDimensionsTitle.innerText = t.resistance.dimensions.title;
   if (resistanceDimensionLeadershipLabel) resistanceDimensionLeadershipLabel.innerText = t.resistance.dimensions.leadershipLabel;
   if (resistanceDimensionLeadershipText) resistanceDimensionLeadershipText.innerText = t.resistance.dimensions.leadershipText;
@@ -596,6 +653,7 @@ function updateDashboard() {
   /* ===== Resistance Index Rendering ===== */
 
   const indices = calculateResistanceIndices();
+  const byPosition = calculateResistanceIndicesByPosition();
   if (!indices) return;
 
   const { leadershipIndex, coreIndex, readinessIndex } = indices;
@@ -609,15 +667,23 @@ function updateDashboard() {
     const el = document.getElementById(id);
     const lbl = document.getElementById(labelId);
     if (!el || !lbl) return;
-    el.innerText = value + "%";
-    el.style.color = indexColor(value);
-    lbl.innerText = interpretIndex(value, lang);
+    el.innerText = value !== null && value !== undefined ? value + "%" : "–";
+    el.style.color = value != null ? indexColor(value) : "#999";
+    lbl.innerText = value != null ? interpretIndex(value, lang) : "";
   };
 
-  bind("leadershipIndex", leadershipIndex, "leadershipLabel");
-  bind("coreIndex", coreIndex, "coreLabel");
-  bind("readinessIndex", readinessIndex, "readinessLabel");
   bind("overallIndex", overallIndex, "overallLabel");
+  if (byPosition) {
+    bind("yuqoriIndex", byPosition.yuqori?.overall ?? null, "yuqoriLabel");
+    bind("ortaIndex", byPosition.orta?.overall ?? null, "ortaLabel");
+    bind("quyiIndex", byPosition.quyi?.overall ?? null, "quyiLabel");
+    bind("mutaxassisIndex", byPosition.mutaxassis?.overall ?? null, "mutaxassisLabel");
+  } else {
+    bind("yuqoriIndex", null, "yuqoriLabel");
+    bind("ortaIndex", null, "ortaLabel");
+    bind("quyiIndex", null, "quyiLabel");
+    bind("mutaxassisIndex", null, "mutaxassisLabel");
+  }
 }
 
 // Savollar bo'yicha statistika
