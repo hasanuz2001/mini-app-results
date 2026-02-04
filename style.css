@@ -241,7 +241,6 @@ button:hover {
   .lang-toggle, .btn-secondary { display: none !important; }
   .hero-badge { display: none !important; }
   #questionsStats { max-height: none !important; overflow: visible !important; }
-  #allResponsesForPrint { display: block !important; page-break-before: auto; }
   body { background: #fff; }
   .hero { background: #1e3a8a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .card { box-shadow: none; border: 1px solid #ddd; }

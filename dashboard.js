@@ -21,8 +21,7 @@ const translations = {
     sections: {
       summary: "Umumiy Ko'rsatkichlar",
       languages: "Til bo'yicha taqsimot",
-      questions: "Savollar Bo'yicha Tahlil",
-      allResponses: "Barcha javoblar"
+      questions: "Savollar Bo'yicha Tahlil"
     },
     labels: {
       participants: "Ishtirokchilar soni",
@@ -112,8 +111,7 @@ const translations = {
     sections: {
       summary: "Overall Indicators",
       languages: "Language breakdown",
-      questions: "Question-Level Analysis",
-      allResponses: "All responses"
+      questions: "Question-Level Analysis"
     },
     labels: {
       participants: "Number of participants",
@@ -901,60 +899,10 @@ function renderAnswerRow(label, count, totalForQuestion, t) {
   `;
 }
 
-// PDF ga saqlash (barcha ma'lumotlar, savollar va javoblar)
-function formatAnswerForPdf(answer, question) {
-  if (!answer) return "";
-  if (answer.text) return String(answer.text).slice(0, 200);
-  const opts = question?.options?.[currentLang] || question?.options?.uz || [];
-  const idx = parseInt(answer.id, 10);
-  if (!isNaN(idx) && opts[idx - 1]) return opts[idx - 1];
-  return answer.id ? String(answer.id) : "";
-}
-
+// PDF ga saqlash — print dialogda "Save as PDF" tanlang
 function exportToPdf() {
   const t = translations[currentLang] || translations.uz;
   const btn = document.getElementById("pdfBtn");
-  const el = document.getElementById("allResponsesForPrint");
-  if (!el) return;
-
-  let html = `<h2 style="margin:0 0 12px 0;">${t.sections.allResponses}</h2>`;
-  if (allResponses.length > 0) {
-    const submissions = new Map();
-    allResponses.forEach((r) => {
-      const key = `${r.user_id}::${r.timestamp}`;
-      if (!submissions.has(key)) submissions.set(key, []);
-      submissions.get(key).push(r);
-    });
-    let tableHtml = `
-      <table style="width:100%; border-collapse:collapse; font-size:11px;">
-        <thead><tr style="background:#f0f0f0;">
-          <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.table.date}</th>
-          <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.table.userId}</th>
-          <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.questionLabel}</th>
-          <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.table.answers}</th>
-        </tr></thead><tbody>`;
-    submissions.forEach((rows) => {
-      rows.sort((a, b) => String(a.question_id).localeCompare(String(b.question_id)));
-      rows.forEach((r) => {
-        const q = findQuestionById(r.question_id);
-        const qText = q?.text?.[currentLang] || q?.text?.uz || `#${r.question_id}`;
-        const aText = formatAnswerForPdf(r.answer, q);
-        const date = r.timestamp ? new Date(r.timestamp).toLocaleDateString(currentLang === "en" ? "en-GB" : "uz-UZ") : "";
-        tableHtml += `<tr>
-          <td style="border:1px solid #ccc; padding:4px;">${date}</td>
-          <td style="border:1px solid #ccc; padding:4px;">${r.user_id || ""}</td>
-          <td style="border:1px solid #ccc; padding:4px;">${qText.slice(0, 80)}${qText.length > 80 ? "…" : ""}</td>
-          <td style="border:1px solid #ccc; padding:4px;">${aText.slice(0, 100)}${aText.length > 100 ? "…" : ""}</td>
-        </tr>`;
-      });
-    });
-    tableHtml += "</tbody></table>";
-    html += `<div style="overflow-x:auto; margin-top:8px;">${tableHtml}</div>`;
-  } else {
-    html += `<p style="color:#999;">${t.states.noData}</p>`;
-  }
-  el.innerHTML = html;
-
   const handler = () => {
     if (btn) { btn.disabled = false; btn.innerText = t.actions.savePdf; }
     window.removeEventListener("afterprint", handler);
