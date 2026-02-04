@@ -118,6 +118,31 @@ button:hover {
   box-shadow: 0 4px 12px rgba(16, 24, 40, 0.15);
 }
 
+.header-top-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-top {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  background: #1e5aa5;
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.btn-top:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 90, 165, 0.3);
+}
+
 .hero {
   background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
   color: #fff;
@@ -238,7 +263,7 @@ button:hover {
 
 /* Print / PDF uchun — Print dialogda "Save as PDF" tanlang */
 @media print {
-  .lang-toggle, .btn-secondary { display: none !important; }
+  .header-top-actions, .lang-toggle, .btn-secondary { display: none !important; }
   .hero-badge { display: none !important; }
   .no-print-pdf, #responsesMetric { display: none !important; }
   #questionsStats { max-height: none !important; overflow: visible !important; }
