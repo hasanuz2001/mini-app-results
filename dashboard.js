@@ -43,7 +43,11 @@ const translations = {
         yuqori: "Yuqori boshqaruv qarshilik indeksi (0–100)",
         orta: "O'rta boshqaruv qarshilik indeksi (0–100)",
         quyi: "Quyi boshqaruv qarshilik indeksi (0–100)",
-        mutaxassis: "Mutaxassis darajasidagi qarshilik indeksi (0–100)"
+        mutaxassis: "Mutaxassis darajasidagi qarshilik indeksi (0–100)",
+        jami: "Jami qarshilik indeksi",
+        leadershipResistance: "Leadership resistance",
+        coreResistance: "Core resistance",
+        readinessResistance: "Readiness resistance"
       },
       dimensions: {
         title: "Qarshilik yo‘nalishlari",
@@ -132,7 +136,11 @@ const translations = {
         yuqori: "Senior Management Resistance Index (0–100)",
         orta: "Middle Management Resistance Index (0–100)",
         quyi: "Lower Management Resistance Index (0–100)",
-        mutaxassis: "Specialist Level Resistance Index (0–100)"
+        mutaxassis: "Specialist Level Resistance Index (0–100)",
+        jami: "Total resistance index",
+        leadershipResistance: "Leadership resistance",
+        coreResistance: "Core resistance",
+        readinessResistance: "Readiness resistance"
       },
       dimensions: {
         title: "Resistance Dimensions",
@@ -673,16 +681,37 @@ function updateDashboard() {
   };
 
   bind("overallIndex", overallIndex, "overallLabel");
+
+  const t = translations[lang] || translations.uz;
+  const bindPositionBlock = (indexId, labelId, breakdownId, data) => {
+    const hasData = data && data.overall !== null;
+    bind(indexId, hasData ? data.overall : null, labelId);
+    const breakdownEl = document.getElementById(breakdownId);
+    if (breakdownEl) {
+      if (hasData) {
+        breakdownEl.innerHTML = `
+          <li>• ${t.resistance.labels.leadershipResistance}: <strong style="color:${indexColor(data.leadershipIndex)}">${data.leadershipIndex}%</strong></li>
+          <li>• ${t.resistance.labels.coreResistance}: <strong style="color:${indexColor(data.coreIndex)}">${data.coreIndex}%</strong></li>
+          <li>• ${t.resistance.labels.readinessResistance}: <strong style="color:${indexColor(data.readinessIndex)}">${data.readinessIndex}%</strong></li>
+        `;
+        breakdownEl.style.display = "";
+      } else {
+        breakdownEl.innerHTML = "";
+        breakdownEl.style.display = "none";
+      }
+    }
+  };
+
   if (byPosition) {
-    bind("yuqoriIndex", byPosition.yuqori?.overall ?? null, "yuqoriLabel");
-    bind("ortaIndex", byPosition.orta?.overall ?? null, "ortaLabel");
-    bind("quyiIndex", byPosition.quyi?.overall ?? null, "quyiLabel");
-    bind("mutaxassisIndex", byPosition.mutaxassis?.overall ?? null, "mutaxassisLabel");
+    bindPositionBlock("yuqoriIndex", "yuqoriLabel", "yuqoriBreakdown", byPosition.yuqori);
+    bindPositionBlock("ortaIndex", "ortaLabel", "ortaBreakdown", byPosition.orta);
+    bindPositionBlock("quyiIndex", "quyiLabel", "quyiBreakdown", byPosition.quyi);
+    bindPositionBlock("mutaxassisIndex", "mutaxassisLabel", "mutaxassisBreakdown", byPosition.mutaxassis);
   } else {
-    bind("yuqoriIndex", null, "yuqoriLabel");
-    bind("ortaIndex", null, "ortaLabel");
-    bind("quyiIndex", null, "quyiLabel");
-    bind("mutaxassisIndex", null, "mutaxassisLabel");
+    bindPositionBlock("yuqoriIndex", "yuqoriLabel", "yuqoriBreakdown", null);
+    bindPositionBlock("ortaIndex", "ortaLabel", "ortaBreakdown", null);
+    bindPositionBlock("quyiIndex", "quyiLabel", "quyiBreakdown", null);
+    bindPositionBlock("mutaxassisIndex", "mutaxassisLabel", "mutaxassisBreakdown", null);
   }
 }
 

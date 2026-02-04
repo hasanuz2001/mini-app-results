@@ -209,6 +209,22 @@ button:hover {
   font-size: 14px;
 }
 
+.position-index-block {
+  margin-bottom: 8px;
+}
+
+.resistance-breakdown {
+  list-style: none;
+  padding-left: 0;
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #5b6575;
+}
+
+.resistance-breakdown li {
+  margin-bottom: 4px;
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;
