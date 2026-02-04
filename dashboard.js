@@ -922,8 +922,9 @@ function exportToPdf() {
   if (!container) return;
 
   const clone = container.cloneNode(true);
-  clone.style.background = "#fff";
-  clone.style.padding = "20px";
+  clone.id = "pdf-export-clone";
+  clone.style.cssText = "position:fixed; left:-9999px; top:0; width:1200px; background:#fff; padding:20px; z-index:-1;";
+  document.body.appendChild(clone);
 
   clone.querySelectorAll(".lang-toggle, .btn-secondary").forEach((el) => { el.style.display = "none"; });
 
@@ -985,24 +986,27 @@ function exportToPdf() {
   const opt = {
     margin: 10,
     filename: `dashboard-${new Date().toISOString().slice(0, 10)}.pdf`,
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2 },
+    image: { type: "jpeg", quality: 0.95 },
+    html2canvas: { scale: 2, scrollX: 0, scrollY: 0, useCORS: true },
     jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-    pagebreak: { mode: ["avoid-all", "css", "legacy"] }
+    pagebreak: { mode: "css", avoid: ["tr", "table"] }
   };
 
-  html2pdf().set(opt).from(clone).save().then(() => {
+  const cleanup = () => {
+    const el = document.getElementById("pdf-export-clone");
+    if (el) el.remove();
     if (btn) {
       btn.disabled = false;
       btn.innerText = t.actions.savePdf;
     }
-  }).catch((err) => {
-    console.error("PDF xatosi:", err);
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = t.actions.savePdf;
-    }
-    alert("PDF yaratishda xatolik yuz berdi.");
+  };
+
+  requestAnimationFrame(() => {
+    html2pdf().set(opt).from(clone).save().then(cleanup).catch((err) => {
+      console.error("PDF xatosi:", err);
+      cleanup();
+      alert("PDF yaratishda xatolik yuz berdi.");
+    });
   });
 }
 
