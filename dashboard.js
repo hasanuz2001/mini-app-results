@@ -286,7 +286,7 @@ function calculateResistanceIndicesByPosition() {
 
   const submissionQ16 = new Map();
   allResponses.forEach(r => {
-    if (String(r.question_id) === "16" && r.answer && r.answer.id) {
+    if (String(r.question_id) === "1b" && r.answer && r.answer.id) {
       const key = `${r.user_id}::${r.timestamp}`;
       submissionQ16.set(key, String(r.answer.id));
     }
@@ -738,9 +738,17 @@ function displayQuestionStats() {
   let html = "";
   
   // Barcha savollarni questions.js dan olish va ID bo'yicha saralash (faqat javob bor savollar emas)
+  const questionOrder = (id) => {
+    const s = String(id);
+    if (s === "1") return 0;
+    if (s === "1a") return 1;
+    if (s === "1b") return 2;
+    const n = parseInt(s, 10);
+    return isNaN(n) ? 999 : n + 2;
+  };
   const allQuestionIds = getQuestions()
     .map((q) => String(q.id))
-    .sort((a, b) => parseInt(a) - parseInt(b));
+    .sort((a, b) => questionOrder(a) - questionOrder(b));
   
   allQuestionIds.forEach((qId) => {
     const answers = stats[qId] || {};

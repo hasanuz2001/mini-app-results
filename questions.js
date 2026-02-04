@@ -22,7 +22,7 @@ const questions = [
 },
 
 {
-  id: 15,
+  id: "1a",
   block: "profile",
   type: "single_choice",
   text: {
@@ -71,7 +71,7 @@ const questions = [
 },
 
 {
-  id: 16,
+  id: "1b",
   block: "profile",
   type: "single_choice",
   text: {
