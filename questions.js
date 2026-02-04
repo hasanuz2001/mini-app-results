@@ -64,6 +64,49 @@ const questions = [
   index: false
 },
 
+{
+  id: 16,
+  block: "profile",
+  type: "single_choice",
+  text: {
+    uz: "Lavozimingiz darajasi qanaqa?",
+    uz_cyrl: "Лавозимингиз даражаси қанақа?",
+    ru: "Какой уровень вашей должности?",
+    en: "What is your position level?"
+  },
+  options: {
+    uz: [
+      "Yuqori boshqaruvda (Kuzatuv kengashi, C yoki C-1)",
+      "O'rta boshqaruvda (C-2, Director)",
+      "Quyi boshqaruvda (Boshqarma, bo'lim boshlig'i)",
+      "Mutaxassis lavozimida (Bosh mutaxassis, etakchi, boshlang'ich darajadagi mutaxassis/injiner)",
+      "Ishchi/xizmat ko'rsatishda"
+    ],
+    uz_cyrl: [
+      "Юқори бошқарувда (Кузатув кенгаши, C ёки C-1)",
+      "Ўрта бошқарувда (C-2, Director)",
+      "Қуйи бошқарувда (Бошқарма, бўлим бошлиғи)",
+      "Мутахассис лавозимида (Бош мутахассис, этакчи, бошланғич даражали мутахассис/инжинер)",
+      "Ишчи/хизмат кўрсатишда"
+    ],
+    ru: [
+      "Высшее руководство (Наблюдательный совет, C или C-1)",
+      "Среднее руководство (C-2, Директор)",
+      "Низшее руководство (Управление, начальник отдела)",
+      "Специалист (Ведущий, главный, специалист/инженер начального уровня)",
+      "Рабочий/обслуживающий персонал"
+    ],
+    en: [
+      "Senior management (Board of directors, C or C-1)",
+      "Middle management (C-2, Director)",
+      "Lower management (Department, division head)",
+      "Specialist (Lead, senior, entry-level specialist/engineer)",
+      "Worker/service staff"
+    ]
+  },
+  index: false
+},
+
 /* ===== BLOK I: PROFIL ===== */
 
 {
