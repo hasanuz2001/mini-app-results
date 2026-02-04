@@ -21,7 +21,8 @@ const translations = {
     sections: {
       summary: "Umumiy Ko'rsatkichlar",
       languages: "Til bo'yicha taqsimot",
-      questions: "Savollar Bo'yicha Tahlil"
+      questions: "Savollar Bo'yicha Tahlil",
+      allResponses: "Barcha javoblar"
     },
     labels: {
       participants: "Ishtirokchilar soni",
@@ -32,7 +33,8 @@ const translations = {
       langEn: "English"
     },
     actions: {
-      refresh: "Ma'lumotlarni yangilash"
+      refresh: "Ma'lumotlarni yangilash",
+      savePdf: "PDF ga saqlash"
     },
     resistance: {
       title: "Umumiy qarshilik indeksi (0–100)",
@@ -78,7 +80,8 @@ const translations = {
     },
     states: {
       loading: "Ma'lumotlar yuklanmoqda...",
-      noData: "Ma'lumotlar mavjud emas"
+      noData: "Ma'lumotlar mavjud emas",
+      pdfGenerating: "PDF yaratilmoqda..."
     },
     questionLabel: "Savol",
     countUnit: "ta",
@@ -108,7 +111,8 @@ const translations = {
     sections: {
       summary: "Overall Indicators",
       languages: "Language breakdown",
-      questions: "Question-Level Analysis"
+      questions: "Question-Level Analysis",
+      allResponses: "All responses"
     },
     labels: {
       participants: "Number of participants",
@@ -119,7 +123,8 @@ const translations = {
       langEn: "English"
     },
     actions: {
-      refresh: "Refresh data"
+      refresh: "Refresh data",
+      savePdf: "Save as PDF"
     },
     resistance: {
       title: "Overall Resistance Index (0–100)",
@@ -165,7 +170,8 @@ const translations = {
     },
     states: {
       loading: "Loading data...",
-      noData: "No data available"
+      noData: "No data available",
+      pdfGenerating: "Generating PDF..."
     },
     questionLabel: "Question",
     countUnit: "responses",
@@ -365,6 +371,7 @@ function applyTranslations() {
   const labelLangRu = document.getElementById("labelLangRu");
   const labelLangEn = document.getElementById("labelLangEn");
   const refreshBtn = document.getElementById("refreshBtn");
+  const pdfBtn = document.getElementById("pdfBtn");
   const noteLabel = document.getElementById("noteLabel");
   const noteText = document.getElementById("noteText");
   const resistanceTitle = document.getElementById("resistanceTitle");
@@ -404,6 +411,7 @@ function applyTranslations() {
   if (labelLangRu) labelLangRu.innerText = t.labels.langRu;
   if (labelLangEn) labelLangEn.innerText = t.labels.langEn;
   if (refreshBtn) refreshBtn.innerText = t.actions.refresh;
+  if (pdfBtn) pdfBtn.innerText = t.actions.savePdf;
   if (noteLabel) noteLabel.innerText = t.note.label;
   if (noteText) noteText.innerText = t.note.text;
   if (resistanceTitle) resistanceTitle.innerText = t.resistance.title;
@@ -449,9 +457,11 @@ function initLanguageControls() {
   const langUzButton = document.getElementById("langUz");
   const langEnButton = document.getElementById("langEn");
   const refreshButton = document.getElementById("refreshBtn");
+  const pdfButton = document.getElementById("pdfBtn");
   if (langUzButton) langUzButton.addEventListener("click", () => setLanguage("uz"));
   if (langEnButton) langEnButton.addEventListener("click", () => setLanguage("en"));
   if (refreshButton) refreshButton.addEventListener("click", refreshData);
+  if (pdfButton) pdfButton.addEventListener("click", exportToPdf);
 }
 
 function refreshData() {
@@ -884,6 +894,116 @@ function renderAnswerRow(label, count, totalForQuestion, t) {
       </div>
     </div>
   `;
+}
+
+// PDF ga saqlash (barcha ma'lumotlar, savollar va javoblar)
+function formatAnswerForPdf(answer, question) {
+  if (!answer) return "";
+  if (answer.text) return String(answer.text).slice(0, 200);
+  const opts = question?.options?.[currentLang] || question?.options?.uz || [];
+  const idx = parseInt(answer.id, 10);
+  if (!isNaN(idx) && opts[idx - 1]) return opts[idx - 1];
+  return answer.id ? String(answer.id) : "";
+}
+
+function exportToPdf() {
+  if (typeof html2pdf === "undefined") {
+    alert("PDF kutubxonasi yuklanmagan. Sahifani yangilang.");
+    return;
+  }
+  const t = translations[currentLang] || translations.uz;
+  const btn = document.getElementById("pdfBtn");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = t.states.pdfGenerating;
+  }
+
+  const container = document.querySelector(".container");
+  if (!container) return;
+
+  const clone = container.cloneNode(true);
+  clone.style.background = "#fff";
+  clone.style.padding = "20px";
+
+  clone.querySelectorAll(".lang-toggle, .btn-secondary").forEach((el) => { el.style.display = "none"; });
+
+  const qStats = clone.querySelector("#questionsStats");
+  if (qStats) qStats.style.maxHeight = "none";
+
+  const allResponsesSection = document.createElement("div");
+  allResponsesSection.className = "card";
+  allResponsesSection.style.marginTop = "20px";
+  allResponsesSection.innerHTML = `<h2 style="margin:0 0 12px 0;">${t.sections.allResponses}</h2>`;
+
+  if (allResponses.length > 0) {
+    const submissions = new Map();
+    allResponses.forEach((r) => {
+      const key = `${r.user_id}::${r.timestamp}`;
+      if (!submissions.has(key)) submissions.set(key, []);
+      submissions.get(key).push(r);
+    });
+
+    let tableHtml = `
+      <table style="width:100%; border-collapse:collapse; font-size:11px;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.table.date}</th>
+            <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.table.userId}</th>
+            <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.questionLabel}</th>
+            <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.table.answers}</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    submissions.forEach((rows) => {
+      rows.sort((a, b) => String(a.question_id).localeCompare(String(b.question_id)));
+      rows.forEach((r) => {
+        const q = findQuestionById(r.question_id);
+        const qText = q?.text?.[currentLang] || q?.text?.uz || `#${r.question_id}`;
+        const aText = formatAnswerForPdf(r.answer, q);
+        const date = r.timestamp ? new Date(r.timestamp).toLocaleDateString(currentLang === "en" ? "en-GB" : "uz-UZ") : "";
+        tableHtml += `
+          <tr>
+            <td style="border:1px solid #ccc; padding:4px;">${date}</td>
+            <td style="border:1px solid #ccc; padding:4px;">${r.user_id || ""}</td>
+            <td style="border:1px solid #ccc; padding:4px;">${qText.slice(0, 80)}${qText.length > 80 ? "…" : ""}</td>
+            <td style="border:1px solid #ccc; padding:4px;">${aText.slice(0, 100)}${aText.length > 100 ? "…" : ""}</td>
+          </tr>
+        `;
+      });
+    });
+
+    tableHtml += "</tbody></table>";
+    allResponsesSection.innerHTML += `<div style="overflow-x:auto; margin-top:8px;">${tableHtml}</div>`;
+  } else {
+    allResponsesSection.innerHTML += `<p style="color:#999;">${t.states.noData}</p>`;
+  }
+
+  clone.querySelector(".note")?.insertAdjacentElement("beforebegin", allResponsesSection);
+
+  const opt = {
+    margin: 10,
+    filename: `dashboard-${new Date().toISOString().slice(0, 10)}.pdf`,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    pagebreak: { mode: ["avoid-all", "css", "legacy"] }
+  };
+
+  html2pdf().set(opt).from(clone).save().then(() => {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = t.actions.savePdf;
+    }
+  }).catch((err) => {
+    console.error("PDF xatosi:", err);
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = t.actions.savePdf;
+    }
+    alert("PDF yaratishda xatolik yuz berdi.");
+  });
 }
 
 // Ma'lumotlar yangilash tugmasi ostida — so'nggi yangilanish vaqti
