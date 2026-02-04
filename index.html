@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AI Resistance Survey Results Dashboard</title>
+  <title>Sun’iy intellektga qarshilik so‘rovnomasi — natijalar paneli</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <link rel="stylesheet" href="style.css">
@@ -12,7 +12,7 @@
   <div class="container">
     <header class="hero">
       <div class="hero-text">
-        <h1 id="heroTitle">AI Resistance Survey Results Dashboard</h1>
+        <h1 id="heroTitle">Sun’iy intellektga qarshilik so‘rovnomasi — natijalar paneli</h1>
         <p id="heroSubtitle" class="subtitle">
           Uran qazib olish sohasida sun'iy intellekt joriy etilishi bo'yicha ichki qarshilik tahlili.
         </p>
@@ -21,7 +21,7 @@
         </p>
       </div>
       <div class="hero-actions">
-        <div id="heroBadge" class="hero-badge">Thesis Review</div>
+        <div id="heroBadge" class="hero-badge">Ekspertiza</div>
         <div class="lang-toggle" role="group" aria-label="Language toggle">
           <button id="langUz" type="button" class="btn-secondary" onclick="setLanguage('uz')">UZ</button>
           <button id="langEn" type="button" class="btn-secondary" onclick="setLanguage('en')">EN</button>
@@ -64,18 +64,18 @@
           <ul id="mutaxassisBreakdown" class="resistance-breakdown"></ul>
         </div>
         <div class="card">
-          <h3 id="resistanceDimensionsTitle">Resistance Dimensions</h3>
+          <h3 id="resistanceDimensionsTitle">Qarshilik yo‘nalishlari</h3>
           <ul style="font-size:14px; line-height:1.6;">
             <li>
-              <strong id="resistanceDimensionLeadershipLabel">Leadership Resistance:</strong>
+              <strong id="resistanceDimensionLeadershipLabel">Rahbariyat qarshiligi:</strong>
               <span id="resistanceDimensionLeadershipText">Rahbariyatning sun’iy intellektga nisbatan pozitsiyasi, ishonchi va kommunikatsiyasi.</span>
             </li>
             <li>
-              <strong id="resistanceDimensionCoreLabel">Core Resistance:</strong>
+              <strong id="resistanceDimensionCoreLabel">Asosiy qarshilik:</strong>
               <span id="resistanceDimensionCoreText">Xodimlarning ishonchi, qo‘rquvlari va texnologiyaga munosabati.</span>
             </li>
             <li>
-              <strong id="resistanceDimensionReadinessLabel">Readiness Resistance:</strong>
+              <strong id="resistanceDimensionReadinessLabel">Tayyorgarlik qarshiligi:</strong>
               <span id="resistanceDimensionReadinessText">Trening, raqamli ko‘nikmalar va institutsional tayyorgarlik darajasi.</span>
             </li>
           </ul>
@@ -83,7 +83,7 @@
       </div>
     </div>
     <div class="card" style="background:#fafafa;">
-      <h3 id="resistanceLegendTitle">Resistance Index Legend</h3>
+      <h3 id="resistanceLegendTitle">Qarshilik indeksi shkalasi</h3>
       <ul style="list-style:none; padding-left:0; font-size:14px;">
         <li><span style="color:#2e7d32;font-weight:bold;">●</span> <span id="resistanceLegend1">0–20 — Qarshilik deyarli yo‘q</span></li>
         <li><span style="color:#c0ca33;font-weight:bold;">●</span> <span id="resistanceLegend2">21–40 — Past qarshilik</span></li>
@@ -150,9 +150,9 @@
       </div>
     </div>
 <div class="card" style="border-left:5px solid #2a9df4;">
-  <h3 id="methodNoteTitle">Methodological Note</h3>
+  <h3 id="methodNoteTitle">Metodologik izoh</h3>
   <p style="font-size:14px; line-height:1.6; color:#333;">
-    <span id="methodNoteBody1">Resistance Index 5 ballik Likert shkalasi asosida hisoblandi. Leadership, Core va Readiness yo‘nalishlari bo‘yicha savollar yig‘indi ballari maksimal mumkin bo‘lgan ballga nisbatan normallashtirilib, 0–100 indeks shakliga keltirildi.</span>
+    <span id="methodNoteBody1">Qarshilik indeksi 5 ballik Likert shkalasi asosida hisoblandi. Rahbariyat, Asosiy va Tayyorgarlik yo‘nalishlari bo‘yicha savollar yig‘indi ballari maksimal mumkin bo‘lgan ballga nisbatan normallashtirilib, 0–100 indeks shakliga keltirildi.</span>
   </p>
   <p style="font-size:13px; color:#555;">
     <span id="methodNoteBody2">Yuqori indeks qiymati sun’iy intellektni joriy etishga nisbatan kuchliroq tashkiliy va psixologik qarshilikni anglatadi.</span>

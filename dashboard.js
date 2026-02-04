@@ -14,7 +14,7 @@ const translations = {
 
 
   uz: {
-    title: "AI Resistance Survey Results Dashboard",
+    title: "Sun’iy intellektga qarshilik so‘rovnomasi — natijalar paneli",
     subtitle: "Uran qazib olish sohasida sun'iy intellektni joriy etishga ichki qarshilik bo'yicha tadqiqot natijalari.",
     meta: "Ushbu panel dissertatsiya (thesis) ko'rib chiqish va akademik baholash uchun mo'ljallangan.",
     badge: "Ekspertiza",
@@ -45,9 +45,9 @@ const translations = {
         quyi: "Quyi boshqaruv qarshilik indeksi (0–100)",
         mutaxassis: "Mutaxassis darajasidagi qarshilik indeksi (0–100)",
         jami: "Jami qarshilik indeksi",
-        leadershipResistance: "Leadership resistance",
-        coreResistance: "Core resistance",
-        readinessResistance: "Readiness resistance"
+        leadershipResistance: "Rahbariyat qarshiligi",
+        coreResistance: "Asosiy qarshilik",
+        readinessResistance: "Tayyorgarlik qarshiligi"
       },
       dimensions: {
         title: "Qarshilik yo‘nalishlari",
@@ -70,7 +70,7 @@ const translations = {
       },
       methodNote: {
         title: "Metodologik izoh",
-        body1: "Qarshilik indeksi 5 ballik Likert shkalasi asosida hisoblandi. Leadership, Core va Readiness yo‘nalishlari bo‘yicha savollar yig‘indi ballari maksimal mumkin bo‘lgan ballga nisbatan normallashtirilib, 0–100 indeks shakliga keltirildi.",
+        body1: "Qarshilik indeksi 5 ballik Likert shkalasi asosida hisoblandi. Rahbariyat, Asosiy va Tayyorgarlik yo‘nalishlari bo‘yicha savollar yig‘indi ballari maksimal mumkin bo‘lgan ballga nisbatan normallashtirilib, 0–100 indeks shakliga keltirildi.",
         body2: "Yuqori indeks qiymati sun’iy intellektni joriy etishga nisbatan kuchliroq tashkiliy va psixologik qarshilikni anglatadi."
       }
     },
