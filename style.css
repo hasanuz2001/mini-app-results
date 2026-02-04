@@ -240,6 +240,7 @@ button:hover {
 @media print {
   .lang-toggle, .btn-secondary { display: none !important; }
   .hero-badge { display: none !important; }
+  .no-print-pdf, #responsesMetric { display: none !important; }
   #questionsStats { max-height: none !important; overflow: visible !important; }
   body { background: #fff; }
   .hero { background: #1e3a8a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
