@@ -455,7 +455,18 @@ function initLanguageControls() {
 }
 
 function refreshData() {
-  loadData();
+  const btn = document.getElementById("refreshBtn");
+  const t = translations[currentLang] || translations.uz;
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = t.states.loading;
+  }
+  loadData().finally(() => {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = t.actions.refresh;
+    }
+  });
 }
 
 if (document.readyState === "loading") {
@@ -468,27 +479,25 @@ if (document.readyState === "loading") {
   applyTranslations();
 }
 
-// GitHub Gist'dan ma'lumotlarni olish
-async function getGistData() {
-  if (!GITHUB_TOKEN || !GIST_ID) {
-    throw new Error('GITHUB_TOKEN yoki GIST_ID sozlanmagan');
+// GitHub Gist'dan yoki local responses.json dan ma'lumotlarni olish
+async function fetchData() {
+  if (GITHUB_TOKEN && GIST_ID) {
+    const url = `https://api.github.com/gists/${GIST_ID}`;
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (!response.ok) throw new Error(`Gist API error: ${response.status}`);
+    const gist = await response.json();
+    const content = gist.files['responses.json'].content;
+    return JSON.parse(content);
   }
-  
-  const url = `https://api.github.com/gists/${GIST_ID}`;
-  const response = await fetch(url, {
-    headers: {
-      'Authorization': `token ${GITHUB_TOKEN}`,
-      'Accept': 'application/vnd.github.v3+json'
-    }
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Gist API error: ${response.status}`);
-  }
-  
-  const gist = await response.json();
-  const content = gist.files['responses.json'].content;
-  return JSON.parse(content);
+  // Fallback: local responses.json (config.js bo'lmaganda)
+  const res = await fetch('responses.json');
+  if (!res.ok) throw new Error('responses.json topilmadi');
+  return res.json();
 }
 
 // Ma'lumotlarni yuklash (to'g'ridan-to'g'ri Gist API'dan)
@@ -501,13 +510,8 @@ async function loadData() {
       statsEl.innerHTML = `<p style="text-align: center; color: #999;">${t.states.loading}</p>`;
     }
     
-    // Token va Gist ID tekshirish
-    if (!GITHUB_TOKEN || !GIST_ID) {
-      throw new Error('GITHUB_TOKEN yoki GIST_ID sozlanmagan');
-    }
-    
-    // Gist'dan ma'lumotlarni olish
-    const gistData = await getGistData();
+    // Ma'lumotlarni olish (Gist yoki local responses.json)
+    const gistData = await fetchData();
     
     // Agar gist bo'sh bo'lsa
     if (!gistData || !gistData.timestamp || gistData.timestamp.length === 0) {
