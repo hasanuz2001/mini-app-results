@@ -683,6 +683,15 @@ function updateDashboard() {
   bind("overallIndex", overallIndex, "overallLabel");
 
   const t = translations[lang] || translations.uz;
+  const overallBreakdownEl = document.getElementById("overallBreakdown");
+  if (overallBreakdownEl) {
+    overallBreakdownEl.innerHTML = `
+      <li>• ${t.resistance.labels.leadershipResistance}: <strong style="color:${indexColor(leadershipIndex)}">${leadershipIndex}%</strong></li>
+      <li>• ${t.resistance.labels.coreResistance}: <strong style="color:${indexColor(coreIndex)}">${coreIndex}%</strong></li>
+      <li>• ${t.resistance.labels.readinessResistance}: <strong style="color:${indexColor(readinessIndex)}">${readinessIndex}%</strong></li>
+    `;
+    overallBreakdownEl.style.display = "";
+  }
   const bindPositionBlock = (indexId, labelId, breakdownId, data) => {
     const hasData = data && data.overall !== null;
     bind(indexId, hasData ? data.overall : null, labelId);
