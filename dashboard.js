@@ -34,7 +34,8 @@ const translations = {
     },
     actions: {
       refresh: "Ma'lumotlarni yangilash",
-      savePdf: "PDF ga saqlash"
+      savePdf: "PDF ga saqlash",
+      pdfHint: "Print dialogda «PDF ga saqlash» ni tanlang"
     },
     resistance: {
       title: "Umumiy qarshilik indeksi (0–100)",
@@ -124,7 +125,8 @@ const translations = {
     },
     actions: {
       refresh: "Refresh data",
-      savePdf: "Save as PDF"
+      savePdf: "Save as PDF",
+      pdfHint: "Select «Save as PDF» in the print dialog"
     },
     resistance: {
       title: "Overall Resistance Index (0–100)",
@@ -411,7 +413,10 @@ function applyTranslations() {
   if (labelLangRu) labelLangRu.innerText = t.labels.langRu;
   if (labelLangEn) labelLangEn.innerText = t.labels.langEn;
   if (refreshBtn) refreshBtn.innerText = t.actions.refresh;
-  if (pdfBtn) pdfBtn.innerText = t.actions.savePdf;
+  if (pdfBtn) {
+    pdfBtn.innerText = t.actions.savePdf;
+    pdfBtn.title = t.actions.pdfHint || "";
+  }
   if (noteLabel) noteLabel.innerText = t.note.label;
   if (noteText) noteText.innerText = t.note.text;
   if (resistanceTitle) resistanceTitle.innerText = t.resistance.title;
@@ -907,35 +912,12 @@ function formatAnswerForPdf(answer, question) {
 }
 
 function exportToPdf() {
-  if (typeof html2pdf === "undefined") {
-    alert("PDF kutubxonasi yuklanmagan. Sahifani yangilang.");
-    return;
-  }
   const t = translations[currentLang] || translations.uz;
   const btn = document.getElementById("pdfBtn");
-  if (btn) {
-    btn.disabled = true;
-    btn.innerText = t.states.pdfGenerating;
-  }
+  const el = document.getElementById("allResponsesForPrint");
+  if (!el) return;
 
-  const container = document.querySelector(".container");
-  if (!container) return;
-
-  const clone = container.cloneNode(true);
-  clone.id = "pdf-export-clone";
-  clone.style.cssText = "position:fixed; left:-9999px; top:0; width:1200px; background:#fff; padding:20px; z-index:-1;";
-  document.body.appendChild(clone);
-
-  clone.querySelectorAll(".lang-toggle, .btn-secondary").forEach((el) => { el.style.display = "none"; });
-
-  const qStats = clone.querySelector("#questionsStats");
-  if (qStats) qStats.style.maxHeight = "none";
-
-  const allResponsesSection = document.createElement("div");
-  allResponsesSection.className = "card";
-  allResponsesSection.style.marginTop = "20px";
-  allResponsesSection.innerHTML = `<h2 style="margin:0 0 12px 0;">${t.sections.allResponses}</h2>`;
-
+  let html = `<h2 style="margin:0 0 12px 0;">${t.sections.allResponses}</h2>`;
   if (allResponses.length > 0) {
     const submissions = new Map();
     allResponses.forEach((r) => {
@@ -943,20 +925,14 @@ function exportToPdf() {
       if (!submissions.has(key)) submissions.set(key, []);
       submissions.get(key).push(r);
     });
-
     let tableHtml = `
       <table style="width:100%; border-collapse:collapse; font-size:11px;">
-        <thead>
-          <tr style="background:#f0f0f0;">
-            <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.table.date}</th>
-            <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.table.userId}</th>
-            <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.questionLabel}</th>
-            <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.table.answers}</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-
+        <thead><tr style="background:#f0f0f0;">
+          <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.table.date}</th>
+          <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.table.userId}</th>
+          <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.questionLabel}</th>
+          <th style="border:1px solid #ccc; padding:6px; text-align:left;">${t.table.answers}</th>
+        </tr></thead><tbody>`;
     submissions.forEach((rows) => {
       rows.sort((a, b) => String(a.question_id).localeCompare(String(b.question_id)));
       rows.forEach((r) => {
@@ -964,50 +940,28 @@ function exportToPdf() {
         const qText = q?.text?.[currentLang] || q?.text?.uz || `#${r.question_id}`;
         const aText = formatAnswerForPdf(r.answer, q);
         const date = r.timestamp ? new Date(r.timestamp).toLocaleDateString(currentLang === "en" ? "en-GB" : "uz-UZ") : "";
-        tableHtml += `
-          <tr>
-            <td style="border:1px solid #ccc; padding:4px;">${date}</td>
-            <td style="border:1px solid #ccc; padding:4px;">${r.user_id || ""}</td>
-            <td style="border:1px solid #ccc; padding:4px;">${qText.slice(0, 80)}${qText.length > 80 ? "…" : ""}</td>
-            <td style="border:1px solid #ccc; padding:4px;">${aText.slice(0, 100)}${aText.length > 100 ? "…" : ""}</td>
-          </tr>
-        `;
+        tableHtml += `<tr>
+          <td style="border:1px solid #ccc; padding:4px;">${date}</td>
+          <td style="border:1px solid #ccc; padding:4px;">${r.user_id || ""}</td>
+          <td style="border:1px solid #ccc; padding:4px;">${qText.slice(0, 80)}${qText.length > 80 ? "…" : ""}</td>
+          <td style="border:1px solid #ccc; padding:4px;">${aText.slice(0, 100)}${aText.length > 100 ? "…" : ""}</td>
+        </tr>`;
       });
     });
-
     tableHtml += "</tbody></table>";
-    allResponsesSection.innerHTML += `<div style="overflow-x:auto; margin-top:8px;">${tableHtml}</div>`;
+    html += `<div style="overflow-x:auto; margin-top:8px;">${tableHtml}</div>`;
   } else {
-    allResponsesSection.innerHTML += `<p style="color:#999;">${t.states.noData}</p>`;
+    html += `<p style="color:#999;">${t.states.noData}</p>`;
   }
+  el.innerHTML = html;
 
-  clone.querySelector(".note")?.insertAdjacentElement("beforebegin", allResponsesSection);
-
-  const opt = {
-    margin: 10,
-    filename: `dashboard-${new Date().toISOString().slice(0, 10)}.pdf`,
-    image: { type: "jpeg", quality: 0.95 },
-    html2canvas: { scale: 2, scrollX: 0, scrollY: 0, useCORS: true },
-    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-    pagebreak: { mode: "css", avoid: ["tr", "table"] }
+  const handler = () => {
+    if (btn) { btn.disabled = false; btn.innerText = t.actions.savePdf; }
+    window.removeEventListener("afterprint", handler);
   };
-
-  const cleanup = () => {
-    const el = document.getElementById("pdf-export-clone");
-    if (el) el.remove();
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = t.actions.savePdf;
-    }
-  };
-
-  requestAnimationFrame(() => {
-    html2pdf().set(opt).from(clone).save().then(cleanup).catch((err) => {
-      console.error("PDF xatosi:", err);
-      cleanup();
-      alert("PDF yaratishda xatolik yuz berdi.");
-    });
-  });
+  window.addEventListener("afterprint", handler);
+  if (btn) { btn.disabled = true; btn.innerText = t.states.pdfGenerating; }
+  window.print();
 }
 
 // Ma'lumotlar yangilash tugmasi ostida — so'nggi yangilanish vaqti
