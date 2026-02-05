@@ -47,6 +47,19 @@ h2 {
   gap: 20px;
 }
 
+.row-two-cols {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.row-two-cols > .card {
+  margin-bottom: 0;
+  min-width: 280px;
+  flex: 1;
+}
+
 .metric h3 {
   margin-top: 0;
 }

@@ -69,7 +69,9 @@
           <p id="mutaxassisLabel" class="metric-note"></p>
           <ul id="mutaxassisBreakdown" class="resistance-breakdown"></ul>
         </div>
-        <div class="card">
+      </div>
+      <div class="row-two-cols">
+        <div class="card" style="flex:1;">
           <h3 id="resistanceDimensionsTitle">Qarshilik yo‘nalishlari</h3>
           <ul style="font-size:14px; line-height:1.6;">
             <li>
@@ -86,20 +88,21 @@
             </li>
           </ul>
         </div>
+        <div class="card" style="flex:1; background:#fafafa;">
+          <h3 id="resistanceLegendTitle">Qarshilik indeksi shkalasi</h3>
+          <ul style="list-style:none; padding-left:0; font-size:14px;">
+            <li><span style="color:#2e7d32;font-weight:bold;">●</span> <span id="resistanceLegend1">0–20 — Qarshilik deyarli yo‘q</span></li>
+            <li><span style="color:#c0ca33;font-weight:bold;">●</span> <span id="resistanceLegend2">21–40 — Past qarshilik</span></li>
+            <li><span style="color:#fb8c00;font-weight:bold;">●</span> <span id="resistanceLegend3">41–60 — O‘rtacha qarshilik</span></li>
+            <li><span style="color:#c62828;font-weight:bold;">●</span> <span id="resistanceLegend4">61–80 — Yuqori qarshilik</span></li>
+            <li><span style="color:#8e0000;font-weight:bold;">●</span> <span id="resistanceLegend5">81–100 — Juda yuqori qarshilik</span></li>
+          </ul>
+        </div>
       </div>
     </div>
-    <div class="card" style="background:#fafafa;">
-      <h3 id="resistanceLegendTitle">Qarshilik indeksi shkalasi</h3>
-      <ul style="list-style:none; padding-left:0; font-size:14px;">
-        <li><span style="color:#2e7d32;font-weight:bold;">●</span> <span id="resistanceLegend1">0–20 — Qarshilik deyarli yo‘q</span></li>
-        <li><span style="color:#c0ca33;font-weight:bold;">●</span> <span id="resistanceLegend2">21–40 — Past qarshilik</span></li>
-        <li><span style="color:#fb8c00;font-weight:bold;">●</span> <span id="resistanceLegend3">41–60 — O‘rtacha qarshilik</span></li>
-        <li><span style="color:#c62828;font-weight:bold;">●</span> <span id="resistanceLegend4">61–80 — Yuqori qarshilik</span></li>
-        <li><span style="color:#8e0000;font-weight:bold;">●</span> <span id="resistanceLegend5">81–100 — Juda yuqori qarshilik</span></li>
-      </ul>
-    </div>
 
-    <!-- Umumiy Statistika -->
+    <!-- Umumiy Statistika va Til -->
+    <div class="row-two-cols">
     <div class="card">
       <h2 id="sectionSummaryTitle">Umumiy Natijalar</h2>
       <div class="metrics">
@@ -113,8 +116,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Til Statistikasi -->
     <div class="card">
       <h2 id="sectionLanguagesTitle">Til bo'yicha taqsimot</h2>
       <div class="metrics" id="languageStats">
@@ -131,6 +132,7 @@
           <h3 id="countLangEn" class="metric-value">0</h3>
         </div>
       </div>
+    </div>
     </div>
 
     <!-- Savollar Bo'yicha Tahlil -->
