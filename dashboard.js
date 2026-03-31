@@ -868,30 +868,32 @@ function renderResistanceByWorkExperience() {
     { id: "4", title: be.group4 }
   ];
 
+  const allDims = [
+    ...dimRows,
+    { key: "overall", label: L.overall }
+  ];
+
   let html = "";
   groups.forEach((g) => {
     const d = byExp[g.id];
-    const hasData = d.n > 0 && d.overall != null && !isNaN(d.overall);
-    html += `<div class="position-index-block">`;
-    html += `<p class="label"><span>${g.title}</span></p>`;
+    html += `<div class="exp-card">`;
+    html += `<h4 class="exp-card-title">${g.title}</h4>`;
     html += `<p class="experience-n-muted">${be.respondentsLabel}: ${d.n}</p>`;
-    if (hasData) {
-      html += `<h3 class="metric-value" style="color:${indexColor(d.overall)}">${d.overall}%</h3>`;
-      html += `<p class="metric-note">${interpretIndex(d.overall, lang)}</p>`;
-      html += `<ul class="resistance-breakdown">`;
-      dimRows.forEach((dim) => {
-        const v = d[dim.key];
-        const ok = v != null && !isNaN(v);
-        html += ok
-          ? `<li>• ${dim.label}: <strong style="color:${indexColor(v)}">${v}%</strong></li>`
-          : `<li>• ${dim.label}: <strong style="color:#999">–</strong></li>`;
-      });
-      html += `</ul>`;
-    } else {
-      html += `<h3 class="metric-value" style="color:#999">–</h3>`;
-      html += `<p class="metric-note"></p>`;
-      html += `<ul class="resistance-breakdown" style="display:none"></ul>`;
-    }
+    allDims.forEach((dim) => {
+      const v = d[dim.key];
+      const pct = v != null && !isNaN(v) ? v : null;
+      const w = pct != null ? Math.min(100, Math.max(0, pct)) : 0;
+      const color = pct != null ? indexColor(pct) : "#cbd5e1";
+      const show = pct != null ? `${pct}%` : "–";
+      html += `
+      <div class="exp-bar-row">
+        <span class="exp-bar-label">${dim.label}</span>
+        <div class="exp-bar-track">
+          <div class="exp-bar-fill" style="width:${w}%;background:${color};"></div>
+        </div>
+        <span class="exp-bar-value" style="color:${pct != null ? color : '#94a3b8'}">${show}</span>
+      </div>`;
+    });
     html += `</div>`;
   });
   mount.innerHTML = html;

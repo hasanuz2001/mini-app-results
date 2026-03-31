@@ -266,7 +266,7 @@ button:hover {
 }
 
 .experience-n-muted {
-  margin: 0 0 8px 0;
+  margin: 0 0 10px 0;
   font-size: 12px;
   color: #64748b;
   letter-spacing: 0.02em;
@@ -275,13 +275,64 @@ button:hover {
 .experience-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 16px;
 }
 
 @media (max-width: 800px) {
   .experience-row {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+.exp-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.exp-card-title {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.exp-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.exp-bar-label {
+  flex: 0 0 auto;
+  width: 90px;
+  font-size: 11.5px;
+  color: #475569;
+  line-height: 1.25;
+}
+
+.exp-bar-track {
+  flex: 1 1 0;
+  height: 20px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.exp-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.35s ease;
+}
+
+.exp-bar-value {
+  flex: 0 0 38px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .resistance-by-experience-note {
