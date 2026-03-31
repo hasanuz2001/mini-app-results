@@ -21,7 +21,8 @@ const translations = {
     sections: {
       summary: "Umumiy Ko'rsatkichlar",
       languages: "Til bo'yicha taqsimot",
-      questions: "Savollar Bo'yicha Tahlil"
+      questions: "Savollar Bo'yicha Tahlil",
+      resistanceByExperience: "Ish tajribasi bo‘yicha qarshilik indeksi (0–100)"
     },
     labels: {
       participants: "Ishtirokchilar soni",
@@ -72,6 +73,14 @@ const translations = {
         title: "Metodologik izoh",
         body1: "Qarshilik indeksi 5 ballik Likert shkalasi asosida hisoblandi. Rahbariyat, Asosiy va Tayyorgarlik yo‘nalishlari bo‘yicha savollar yig‘indi ballari maksimal mumkin bo‘lgan ballga nisbatan normallashtirilib, 0–100 indeks shakliga keltirildi.",
         body2: "Yuqori indeks qiymati sun’iy intellektni joriy etishga nisbatan kuchliroq tashkiliy va psixologik qarshilikni anglatadi."
+      },
+      byExperience: {
+        group1: "0–5 yil",
+        group2: "6–10 yil",
+        group3: "11–20 yil",
+        group4: "20 yildan ortiq",
+        respondentsLabel: "Ishtirokchilar",
+        note: "Har bir foydalanuvchining birinchi topshirig‘i; uran sektorida ishlamaganlar (1a = 5) chiqarib tashlangan. Indeks 3 ballik Likert (1–3) asosida: ((o‘rtacha − 1) / 2) × 100."
       }
     },
     note: {
@@ -111,7 +120,8 @@ const translations = {
     sections: {
       summary: "Overall Indicators",
       languages: "Language breakdown",
-      questions: "Question-Level Analysis"
+      questions: "Question-Level Analysis",
+      resistanceByExperience: "Resistance Index by Work Experience (0–100)"
     },
     labels: {
       participants: "Number of participants",
@@ -162,6 +172,14 @@ const translations = {
         title: "Methodological Note",
         body1: "The Resistance Index is calculated using a 5-point Likert scale. Question totals for Leadership, Core, and Readiness are normalized against the maximum possible score and converted to a 0–100 index.",
         body2: "Higher index values indicate stronger organizational and psychological resistance to AI adoption."
+      },
+      byExperience: {
+        group1: "0–5 years",
+        group2: "6–10 years",
+        group3: "11–20 years",
+        group4: "20+ years",
+        respondentsLabel: "Respondents",
+        note: "First submission per user; respondents not in the uranium sector (Q1a = 5) excluded. Index from 3-point Likert (1–3): ((mean − 1) / 2) × 100."
       }
     },
     note: {
@@ -229,7 +247,8 @@ function indexColor(value) {
   if (value <= 20) return "#2e7d32";
   if (value <= 40) return "#c0ca33";
   if (value <= 60) return "#fb8c00";
-  return "#c62828";
+  if (value <= 80) return "#c62828";
+  return "#8e0000";
 }
 function calculateResistanceIndices() {
   if (!allResponses || allResponses.length === 0) return null;
@@ -334,6 +353,105 @@ function calculateResistanceIndicesByPosition() {
     mutaxassis: calcForGroup(byLevel["4"])
   };
 }
+
+function likertResistance123(answer) {
+  if (!answer || answer.id == null || answer.id === "") return null;
+  const id = String(answer.id);
+  if (id === "1" || id === "2" || id === "3") return parseInt(id, 10);
+  return null;
+}
+
+function dimensionIndexFromLikert(scores) {
+  const valid = scores.filter((s) => s != null && !isNaN(s));
+  if (valid.length === 0) return null;
+  const avg = valid.reduce((a, b) => a + b, 0) / valid.length;
+  return Math.round(((avg - 1) / 2) * 100);
+}
+
+function respondentResistanceIndicesLikert(answerByQ) {
+  const L = dimensionIndexFromLikert(
+    ["5", "6", "7"].map((q) => likertResistance123(answerByQ[q]))
+  );
+  const C = dimensionIndexFromLikert(
+    ["8", "9", "10"].map((q) => likertResistance123(answerByQ[q]))
+  );
+  const R = dimensionIndexFromLikert(
+    ["11", "12", "13"].map((q) => likertResistance123(answerByQ[q]))
+  );
+  const parts = [L, C, R].filter((x) => x != null);
+  if (parts.length === 0) return null;
+  const overall = Math.round(parts.reduce((a, b) => a + b, 0) / parts.length);
+  return { leadership: L, core: C, readiness: R, overall };
+}
+
+function meanInt(indices) {
+  const v = indices.filter((x) => x != null && !isNaN(x));
+  if (v.length === 0) return null;
+  return Math.round(v.reduce((a, b) => a + b, 0) / v.length);
+}
+
+function calculateResistanceIndicesByWorkExperience() {
+  const empty = () => ({
+    "1": { n: 0, leadership: null, core: null, readiness: null, overall: null },
+    "2": { n: 0, leadership: null, core: null, readiness: null, overall: null },
+    "3": { n: 0, leadership: null, core: null, readiness: null, overall: null },
+    "4": { n: 0, leadership: null, core: null, readiness: null, overall: null }
+  });
+
+  if (!allResponses || allResponses.length === 0) return empty();
+
+  const bestSubmissionByUser = new Map();
+  allResponses.forEach((r) => {
+    const uid = r.user_id;
+    const key = `${uid}::${r.timestamp}`;
+    const prev = bestSubmissionByUser.get(uid);
+    if (!prev || String(r.timestamp).localeCompare(String(prev.timestamp)) < 0) {
+      bestSubmissionByUser.set(uid, { timestamp: r.timestamp, key });
+    }
+  });
+
+  const buckets = {
+    "1": { rows: [] },
+    "2": { rows: [] },
+    "3": { rows: [] },
+    "4": { rows: [] }
+  };
+
+  bestSubmissionByUser.forEach(({ key: submissionKey }) => {
+    const rows = allResponses.filter(
+      (r) => `${r.user_id}::${r.timestamp}` === submissionKey
+    );
+    const answerByQ = {};
+    rows.forEach((r) => {
+      answerByQ[String(r.question_id)] = r.answer;
+    });
+
+    const q1a = answerByQ["1a"];
+    if (q1a && String(q1a.id) === "5") return;
+
+    const q2id = answerByQ["2"] && answerByQ["2"].id != null ? String(answerByQ["2"].id) : null;
+    if (!q2id || !buckets[q2id]) return;
+
+    const idx = respondentResistanceIndicesLikert(answerByQ);
+    if (!idx) return;
+
+    buckets[q2id].rows.push(idx);
+  });
+
+  const out = empty();
+  ["1", "2", "3", "4"].forEach((gid) => {
+    const list = buckets[gid].rows;
+    out[gid].n = list.length;
+    if (!list.length) return;
+    out[gid].leadership = meanInt(list.map((x) => x.leadership));
+    out[gid].core = meanInt(list.map((x) => x.core));
+    out[gid].readiness = meanInt(list.map((x) => x.readiness));
+    out[gid].overall = meanInt(list.map((x) => x.overall));
+  });
+
+  return out;
+}
+
 function getQuestions() {
   if (typeof questions === "undefined") {
     return [];
@@ -364,6 +482,9 @@ function applyTranslations() {
   const sectionSummaryTitle = document.getElementById("sectionSummaryTitle");
   const sectionLanguagesTitle = document.getElementById("sectionLanguagesTitle");
   const sectionQuestionsTitle = document.getElementById("sectionQuestionsTitle");
+  const sectionResistanceByExperienceTitle = document.getElementById(
+    "sectionResistanceByExperienceTitle"
+  );
   const labelParticipants = document.getElementById("labelParticipants");
   const labelResponses = document.getElementById("labelResponses");
   const labelLastUpdate = document.getElementById("labelLastUpdate");
@@ -404,6 +525,9 @@ function applyTranslations() {
   if (sectionSummaryTitle) sectionSummaryTitle.innerText = t.sections.summary;
   if (sectionLanguagesTitle) sectionLanguagesTitle.innerText = t.sections.languages;
   if (sectionQuestionsTitle) sectionQuestionsTitle.innerText = t.sections.questions;
+  if (sectionResistanceByExperienceTitle) {
+    sectionResistanceByExperienceTitle.innerText = t.sections.resistanceByExperience;
+  }
   if (labelParticipants) labelParticipants.innerText = t.labels.participants;
   if (labelResponses) labelResponses.innerText = t.labels.responses;
   if (labelLastUpdate) labelLastUpdate.innerText = t.labels.lastUpdate;
@@ -655,13 +779,6 @@ function updateDashboard() {
 
   const indices = calculateResistanceIndices();
   const byPosition = calculateResistanceIndicesByPosition();
-  if (!indices) return;
-
-  const { leadershipIndex, coreIndex, readinessIndex } = indices;
-  const overallIndex = Math.round(
-    (leadershipIndex + coreIndex + readinessIndex) / 3
-  );
-
   const lang = currentLang || "uz";
 
   const bind = (id, value, labelId) => {
@@ -673,18 +790,34 @@ function updateDashboard() {
     lbl.innerText = value != null ? interpretIndex(value, lang) : "";
   };
 
-  bind("overallIndex", overallIndex, "overallLabel");
-
   const t = translations[lang] || translations.uz;
-  const overallBreakdownEl = document.getElementById("overallBreakdown");
-  if (overallBreakdownEl) {
-    overallBreakdownEl.innerHTML = `
+
+  if (indices) {
+    const { leadershipIndex, coreIndex, readinessIndex } = indices;
+    const overallIndex = Math.round(
+      (leadershipIndex + coreIndex + readinessIndex) / 3
+    );
+
+    bind("overallIndex", overallIndex, "overallLabel");
+
+    const overallBreakdownEl = document.getElementById("overallBreakdown");
+    if (overallBreakdownEl) {
+      overallBreakdownEl.innerHTML = `
       <li>• ${t.resistance.labels.leadershipResistance}: <strong style="color:${indexColor(leadershipIndex)}">${leadershipIndex}%</strong></li>
       <li>• ${t.resistance.labels.coreResistance}: <strong style="color:${indexColor(coreIndex)}">${coreIndex}%</strong></li>
       <li>• ${t.resistance.labels.readinessResistance}: <strong style="color:${indexColor(readinessIndex)}">${readinessIndex}%</strong></li>
     `;
-    overallBreakdownEl.style.display = "";
+      overallBreakdownEl.style.display = "";
+    }
+  } else {
+    bind("overallIndex", null, "overallLabel");
+    const overallBreakdownEl = document.getElementById("overallBreakdown");
+    if (overallBreakdownEl) {
+      overallBreakdownEl.innerHTML = "";
+      overallBreakdownEl.style.display = "none";
+    }
   }
+
   const bindPositionBlock = (indexId, labelId, breakdownId, data) => {
     const hasData = data && data.overall !== null;
     bind(indexId, hasData ? data.overall : null, labelId);
@@ -715,6 +848,57 @@ function updateDashboard() {
     bindPositionBlock("quyiIndex", "quyiLabel", "quyiBreakdown", null);
     bindPositionBlock("mutaxassisIndex", "mutaxassisLabel", "mutaxassisBreakdown", null);
   }
+
+  renderResistanceByWorkExperience();
+}
+
+function renderResistanceByWorkExperience() {
+  const mount = document.getElementById("resistanceByExperienceMount");
+  if (!mount) return;
+
+  const lang = currentLang || "uz";
+  const t = translations[lang] || translations.uz;
+  const byExp = calculateResistanceIndicesByWorkExperience();
+  const L = t.resistance.labels;
+  const be = t.resistance.byExperience;
+  const dims = [
+    { key: "leadership", label: L.leadershipResistance },
+    { key: "core", label: L.coreResistance },
+    { key: "readiness", label: L.readinessResistance },
+    { key: "overall", label: L.overall }
+  ];
+  const groups = [
+    { id: "1", title: be.group1 },
+    { id: "2", title: be.group2 },
+    { id: "3", title: be.group3 },
+    { id: "4", title: be.group4 }
+  ];
+
+  let html = '<div class="experience-resistance-grid">';
+  groups.forEach((g) => {
+    const d = byExp[g.id];
+    html += `<div class="experience-resistance-card">`;
+    html += `<h3 class="experience-resistance-card-title">${g.title}</h3>`;
+    html += `<p class="experience-resistance-n"><span class="experience-resistance-n-label">${be.respondentsLabel}:</span> ${d.n}</p>`;
+    dims.forEach((dim) => {
+      const v = d[dim.key];
+      const pct = v != null && !isNaN(v) ? v : null;
+      const w = pct != null ? Math.min(100, Math.max(0, pct)) : 0;
+      const color = pct != null ? indexColor(pct) : "#cbd5e1";
+      const show = pct != null ? `${pct}%` : "–";
+      html += `
+    <div class="exp-res-bar-row">
+      <div class="exp-res-bar-label">${dim.label}</div>
+      <div class="exp-res-bar-track">
+        <div class="exp-res-bar-fill" style="width:${w}%;background:${color};"></div>
+      </div>
+      <div class="exp-res-bar-value" style="color:${pct != null ? color : "#64748b"}">${show}</div>
+    </div>`;
+    });
+    html += `</div>`;
+  });
+  html += `</div><p class="experience-resistance-note">${be.note}</p>`;
+  mount.innerHTML = html;
 }
 
 // Savollar bo'yicha statistika
