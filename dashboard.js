@@ -616,25 +616,19 @@ if (document.readyState === "loading") {
   applyTranslations();
 }
 
-// GitHub Gist'dan yoki local responses.json dan ma'lumotlarni olish
+// GitHub Gist'dan ma'lumotlarni olish
 async function fetchData() {
-  if (GITHUB_TOKEN && GIST_ID) {
-    const url = `https://api.github.com/gists/${GIST_ID}`;
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-    if (!response.ok) throw new Error(`Gist API error: ${response.status}`);
-    const gist = await response.json();
-    const content = gist.files['responses.json'].content;
-    return JSON.parse(content);
-  }
-  // Fallback: local responses.json (config.js bo'lmaganda)
-  const res = await fetch('responses.json');
-  if (!res.ok) throw new Error('responses.json topilmadi');
-  return res.json();
+  if (!GIST_ID) throw new Error('GIST_ID sozlanmagan');
+
+  const url = `https://api.github.com/gists/${GIST_ID}`;
+  const headers = { 'Accept': 'application/vnd.github.v3+json' };
+  if (GITHUB_TOKEN) headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+
+  const response = await fetch(url, { headers });
+  if (!response.ok) throw new Error(`Gist API error: ${response.status}`);
+  const gist = await response.json();
+  const content = gist.files['responses.json'].content;
+  return JSON.parse(content);
 }
 
 // Ma'lumotlarni yuklash (to'g'ridan-to'g'ri Gist API'dan)
