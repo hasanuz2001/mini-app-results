@@ -272,6 +272,18 @@ button:hover {
   letter-spacing: 0.02em;
 }
 
+.experience-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 800px) {
+  .experience-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .resistance-by-experience-note {
   margin: 14px 0 0 0;
   font-size: 12px;
