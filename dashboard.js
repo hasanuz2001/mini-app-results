@@ -854,6 +854,7 @@ function updateDashboard() {
 
 function renderResistanceByWorkExperience() {
   const mount = document.getElementById("resistanceByExperienceMount");
+  const noteEl = document.getElementById("resistanceByExperienceNote");
   if (!mount) return;
 
   const lang = currentLang || "uz";
@@ -861,11 +862,10 @@ function renderResistanceByWorkExperience() {
   const byExp = calculateResistanceIndicesByWorkExperience();
   const L = t.resistance.labels;
   const be = t.resistance.byExperience;
-  const dims = [
+  const dimRows = [
     { key: "leadership", label: L.leadershipResistance },
     { key: "core", label: L.coreResistance },
-    { key: "readiness", label: L.readinessResistance },
-    { key: "overall", label: L.overall }
+    { key: "readiness", label: L.readinessResistance }
   ];
   const groups = [
     { id: "1", title: be.group1 },
@@ -874,31 +874,38 @@ function renderResistanceByWorkExperience() {
     { id: "4", title: be.group4 }
   ];
 
-  let html = '<div class="experience-resistance-grid">';
+  let html = "";
   groups.forEach((g) => {
     const d = byExp[g.id];
-    html += `<div class="experience-resistance-card">`;
-    html += `<h3 class="experience-resistance-card-title">${g.title}</h3>`;
-    html += `<p class="experience-resistance-n"><span class="experience-resistance-n-label">${be.respondentsLabel}:</span> ${d.n}</p>`;
-    dims.forEach((dim) => {
-      const v = d[dim.key];
-      const pct = v != null && !isNaN(v) ? v : null;
-      const w = pct != null ? Math.min(100, Math.max(0, pct)) : 0;
-      const color = pct != null ? indexColor(pct) : "#cbd5e1";
-      const show = pct != null ? `${pct}%` : "–";
-      html += `
-    <div class="exp-res-bar-row">
-      <div class="exp-res-bar-label">${dim.label}</div>
-      <div class="exp-res-bar-track">
-        <div class="exp-res-bar-fill" style="width:${w}%;background:${color};"></div>
-      </div>
-      <div class="exp-res-bar-value" style="color:${pct != null ? color : "#64748b"}">${show}</div>
-    </div>`;
-    });
+    const hasData = d.n > 0 && d.overall != null && !isNaN(d.overall);
+    html += `<div class="position-index-block">`;
+    html += `<p class="label"><span>${g.title}</span></p>`;
+    html += `<p class="experience-n-muted">${be.respondentsLabel}: ${d.n}</p>`;
+    if (hasData) {
+      html += `<h3 class="metric-value" style="color:${indexColor(d.overall)}">${d.overall}%</h3>`;
+      html += `<p class="metric-note">${interpretIndex(d.overall, lang)}</p>`;
+      html += `<ul class="resistance-breakdown">`;
+      dimRows.forEach((dim) => {
+        const v = d[dim.key];
+        const ok = v != null && !isNaN(v);
+        html += ok
+          ? `<li>• ${dim.label}: <strong style="color:${indexColor(v)}">${v}%</strong></li>`
+          : `<li>• ${dim.label}: <strong style="color:#999">–</strong></li>`;
+      });
+      html += `</ul>`;
+    } else {
+      html += `<h3 class="metric-value" style="color:#999">–</h3>`;
+      html += `<p class="metric-note"></p>`;
+      html += `<ul class="resistance-breakdown" style="display:none"></ul>`;
+    }
     html += `</div>`;
   });
-  html += `</div><p class="experience-resistance-note">${be.note}</p>`;
   mount.innerHTML = html;
+
+  if (noteEl) {
+    noteEl.textContent = be.note;
+    noteEl.hidden = false;
+  }
 }
 
 // Savollar bo'yicha statistika

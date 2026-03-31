@@ -255,6 +255,30 @@ button:hover {
   margin-bottom: 8px;
 }
 
+.resistance-subsection-heading {
+  margin: 22px 0 14px 0;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+  color: #1e5aa5;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.experience-n-muted {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: #64748b;
+  letter-spacing: 0.02em;
+}
+
+.resistance-by-experience-note {
+  margin: 14px 0 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #64748b;
+}
+
 .resistance-breakdown {
   list-style: none;
   padding-left: 0;
@@ -265,79 +289,6 @@ button:hover {
 
 .resistance-breakdown li {
   margin-bottom: 4px;
-}
-
-.experience-resistance-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
-  margin-top: 12px;
-}
-
-.experience-resistance-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.experience-resistance-card-title {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  color: #1e293b;
-}
-
-.experience-resistance-n {
-  margin: 0 0 14px 0;
-  font-size: 13px;
-  color: #64748b;
-}
-
-.experience-resistance-n-label {
-  font-weight: 600;
-  color: #475569;
-}
-
-.exp-res-bar-row {
-  display: grid;
-  grid-template-columns: minmax(100px, 1fr) minmax(0, 2fr) 44px;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.exp-res-bar-label {
-  font-size: 12px;
-  color: #334155;
-  line-height: 1.3;
-}
-
-.exp-res-bar-track {
-  height: 22px;
-  background: #e2e8f0;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.exp-res-bar-fill {
-  height: 100%;
-  border-radius: 4px;
-  min-width: 0;
-  transition: width 0.35s ease;
-}
-
-.exp-res-bar-value {
-  font-size: 13px;
-  font-weight: 700;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.experience-resistance-note {
-  margin: 16px 0 0 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #64748b;
 }
 
 .actions {
