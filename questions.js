@@ -206,10 +206,10 @@ const questions = [
       "Я доверяю ИИ очень мало, так как речь идёт об уране"
     ],
     en: [
-      "I trust Sun'iy Intellekt decisions 100%",
-      "I trust Sun'iy Intellekt 80%, but 20% should be reviewed by humans",
-      "Decisions should be 50% Sun'iy Intellekt and 50% human",
-      "I trust Sun'iy Intellekt very little, because this involves uranium"
+      "I trust AI decisions 100%",
+      "I trust AI 80%, but 20% should be reviewed by humans",
+      "Decisions should be 50% AI and 50% human",
+      "I trust AI very little, because this involves uranium"
     ]
   },
   index: false
@@ -370,8 +370,8 @@ const questions = [
     ],
     en: [
       "Yes, I think I might lose my job",
-      "I will work alongside Sun'iy Intellekt and take on new tasks",
-      "Sun'iy Intellekt will not be able to fully replace me",
+      "I will work alongside AI and take on new tasks",
+      "AI will not be able to fully replace me",
       "In my opinion:"
     ]
   },
@@ -514,7 +514,7 @@ const questions = [
   text: {
     uz: "Oldingi innovatsiyalar korxonada muvaffaqiyatli bo‘lgan deb hisoblaysizmi?",
     uz_cyrl: "Олдинги innovatsiyalar korxonada muvaffaqiyatli bo‘lgan deb hisoblaysizmi?",
-    ru: "Считаете ли вы, что предыдущие инновации в компании были successful?",
+    ru: "Считаете ли вы, что предыдущие инновации в компании были успешными?",
     en: "Do you think previous innovations in the company were successful?"
   },
   options: {
