@@ -80,7 +80,7 @@ const translations = {
         group3: "11–20 yil",
         group4: "20 yildan ortiq",
         respondentsLabel: "Ishtirokchilar",
-        note: "Har bir foydalanuvchining birinchi topshirig‘i; uran sektorida ishlamaganlar (1a = 5) chiqarib tashlangan. Indeks 3 ballik Likert (1–3) asosida: ((o‘rtacha − 1) / 2) × 100."
+        note: "Har bir foydalanuvchining birinchi topshirig'i; uran sektorida ishlamaganlar (1a=5) chiqarib tashlangan. Umumiy qarshilik indeksi bilan bir xil 5 ballik Likert (1-5): Rahbariyat (Q5-Q7, maks 15), Asosiy (Q3, Q4, Q12, maks 15), Tayyorgarlik (Q8-Q11, maks 20)."
       }
     },
     note: {
@@ -179,7 +179,7 @@ const translations = {
         group3: "11–20 years",
         group4: "20+ years",
         respondentsLabel: "Respondents",
-        note: "First submission per user; respondents not in the uranium sector (Q1a = 5) excluded. Index from 3-point Likert (1–3): ((mean − 1) / 2) × 100."
+        note: "First submission per user; respondents not in the uranium sector (Q1a = 5) excluded. Index uses the same 5-point Likert (1–5) scale as the main index: Leadership (Q5–Q7, max 15), Core (Q3, Q4, Q12, max 15), Readiness (Q8–Q11, max 20)."
       }
     },
     note: {
@@ -354,42 +354,6 @@ function calculateResistanceIndicesByPosition() {
   };
 }
 
-function likertResistance123(answer) {
-  if (!answer || answer.id == null || answer.id === "") return null;
-  const id = String(answer.id);
-  if (id === "1" || id === "2" || id === "3") return parseInt(id, 10);
-  return null;
-}
-
-function dimensionIndexFromLikert(scores) {
-  const valid = scores.filter((s) => s != null && !isNaN(s));
-  if (valid.length === 0) return null;
-  const avg = valid.reduce((a, b) => a + b, 0) / valid.length;
-  return Math.round(((avg - 1) / 2) * 100);
-}
-
-function respondentResistanceIndicesLikert(answerByQ) {
-  const L = dimensionIndexFromLikert(
-    ["5", "6", "7"].map((q) => likertResistance123(answerByQ[q]))
-  );
-  const C = dimensionIndexFromLikert(
-    ["8", "9", "10"].map((q) => likertResistance123(answerByQ[q]))
-  );
-  const R = dimensionIndexFromLikert(
-    ["11", "12", "13"].map((q) => likertResistance123(answerByQ[q]))
-  );
-  const parts = [L, C, R].filter((x) => x != null);
-  if (parts.length === 0) return null;
-  const overall = Math.round(parts.reduce((a, b) => a + b, 0) / parts.length);
-  return { leadership: L, core: C, readiness: R, overall };
-}
-
-function meanInt(indices) {
-  const v = indices.filter((x) => x != null && !isNaN(x));
-  if (v.length === 0) return null;
-  return Math.round(v.reduce((a, b) => a + b, 0) / v.length);
-}
-
 function calculateResistanceIndicesByWorkExperience() {
   const empty = () => ({
     "1": { n: 0, leadership: null, core: null, readiness: null, overall: null },
@@ -400,6 +364,7 @@ function calculateResistanceIndicesByWorkExperience() {
 
   if (!allResponses || allResponses.length === 0) return empty();
 
+  // Har bir user uchun faqat birinchi (eng eski) topshiriq
   const bestSubmissionByUser = new Map();
   allResponses.forEach((r) => {
     const uid = r.user_id;
@@ -410,43 +375,60 @@ function calculateResistanceIndicesByWorkExperience() {
     }
   });
 
-  const buckets = {
-    "1": { rows: [] },
-    "2": { rows: [] },
-    "3": { rows: [] },
-    "4": { rows: [] }
-  };
+  // Q2 bo'yicha topshiriq kalitlarini guruhlash
+  const byGroup = { "1": [], "2": [], "3": [], "4": [] };
 
   bestSubmissionByUser.forEach(({ key: submissionKey }) => {
     const rows = allResponses.filter(
       (r) => `${r.user_id}::${r.timestamp}` === submissionKey
     );
     const answerByQ = {};
-    rows.forEach((r) => {
-      answerByQ[String(r.question_id)] = r.answer;
-    });
+    rows.forEach((r) => { answerByQ[String(r.question_id)] = r.answer; });
 
+    // Uran sektorida ishlamaganlarni chiqarib tashlash (Q1a = 5)
     const q1a = answerByQ["1a"];
     if (q1a && String(q1a.id) === "5") return;
 
-    const q2id = answerByQ["2"] && answerByQ["2"].id != null ? String(answerByQ["2"].id) : null;
-    if (!q2id || !buckets[q2id]) return;
+    const q2id = answerByQ["2"] && answerByQ["2"].id != null
+      ? String(answerByQ["2"].id) : null;
+    if (!q2id || !byGroup[q2id]) return;
 
-    const idx = respondentResistanceIndicesLikert(answerByQ);
-    if (!idx) return;
-
-    buckets[q2id].rows.push(idx);
+    byGroup[q2id].push(submissionKey);
   });
+
+  // Asosiy indeks bilan bir xil: toIndex(avg, max) — 5 ballik Likert
+  const calcForGroup = (submissionKeys) => {
+    const n = submissionKeys.length;
+    if (n === 0) return { overall: null, leadership: null, core: null, readiness: null, n: 0 };
+
+    let leadershipSum = 0, coreSum = 0, readinessSum = 0;
+    const keysSet = new Set(submissionKeys);
+
+    allResponses.forEach((r) => {
+      const key = `${r.user_id}::${r.timestamp}`;
+      if (!keysSet.has(key)) return;
+      const qId = String(r.question_id);
+      const answer = r.answer;
+      if (!answer || !answer.id) return;
+      const val = parseInt(answer.id, 10);
+      if (isNaN(val)) return;
+
+      if (["5", "6", "7"].includes(qId))        leadershipSum += val;
+      if (["3", "4", "12"].includes(qId))        coreSum += val;
+      if (["8", "9", "10", "11"].includes(qId))  readinessSum += val;
+    });
+
+    const li = toIndex(leadershipSum / n, 15);
+    const ci = toIndex(coreSum / n, 15);
+    const ri = toIndex(readinessSum / n, 20);
+    const overall = Math.round((li + ci + ri) / 3);
+    return { n, leadership: li, core: ci, readiness: ri, overall };
+  };
 
   const out = empty();
   ["1", "2", "3", "4"].forEach((gid) => {
-    const list = buckets[gid].rows;
-    out[gid].n = list.length;
-    if (!list.length) return;
-    out[gid].leadership = meanInt(list.map((x) => x.leadership));
-    out[gid].core = meanInt(list.map((x) => x.core));
-    out[gid].readiness = meanInt(list.map((x) => x.readiness));
-    out[gid].overall = meanInt(list.map((x) => x.overall));
+    const result = calcForGroup(byGroup[gid]);
+    out[gid] = result;
   });
 
   return out;
