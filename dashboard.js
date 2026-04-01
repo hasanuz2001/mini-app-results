@@ -71,7 +71,7 @@ const translations = {
       },
       methodNote: {
         title: "Metodologik izoh",
-        body1: "Qarshilik indeksi 5 ballik Likert shkalasi asosida hisoblandi. Rahbariyat, Asosiy va Tayyorgarlik yo‘nalishlari bo‘yicha savollar yig‘indi ballari maksimal mumkin bo‘lgan ballga nisbatan normallashtirilib, 0–100 indeks shakliga keltirildi.",
+        body1: "Qarshilik indeksi haqiqiy javob variantlari asosida normallashtirilib hisoblandi: Rahbariyat (Q5–Q7, maks 9), Asosiy (Q3, Q4, Q12, maks 10), Tayyorgarlik (Q8–Q11, maks 11). Har bir guruh yig'indi ballari maksimal mumkin bo'lgan ballga bo'linib, 0–100 indeks shakliga keltirildi.",
         body2: "Yuqori indeks qiymati sun’iy intellektni joriy etishga nisbatan kuchliroq tashkiliy va psixologik qarshilikni anglatadi."
       },
       byExperience: {
@@ -170,7 +170,7 @@ const translations = {
       },
       methodNote: {
         title: "Methodological Note",
-        body1: "The Resistance Index is calculated using a 5-point Likert scale. Question totals for Leadership, Core, and Readiness are normalized against the maximum possible score and converted to a 0–100 index.",
+        body1: "The Resistance Index is normalized against the actual answer-option maxima: Leadership (Q5–Q7, max 9), Core (Q3, Q4, Q12, max 10), Readiness (Q8–Q11, max 11). Each group total is divided by its maximum possible score and scaled to 0–100.",
         body2: "Higher index values indicate stronger organizational and psychological resistance to AI adoption."
       },
       byExperience: {
@@ -288,9 +288,9 @@ function calculateResistanceIndices() {
   const readinessAvg = readinessSum / respondentCount;
 
   return {
-    leadershipIndex: toIndex(leadershipAvg, 15),
-    coreIndex: toIndex(coreAvg, 15),
-    readinessIndex: toIndex(readinessAvg, 20)
+    leadershipIndex: toIndex(leadershipAvg, 9),
+    coreIndex: toIndex(coreAvg, 10),
+    readinessIndex: toIndex(readinessAvg, 11)
   };
 }
 
@@ -334,9 +334,9 @@ function calculateResistanceIndicesByPosition() {
     const coreAvg = coreSum / n;
     const readinessAvg = readinessSum / n;
 
-    const li = toIndex(leadershipAvg, 15);
-    const ci = toIndex(coreAvg, 15);
-    const ri = toIndex(readinessAvg, 20);
+    const li = toIndex(leadershipAvg, 9);
+    const ci = toIndex(coreAvg, 10);
+    const ri = toIndex(readinessAvg, 11);
     const overall = Math.round((li + ci + ri) / 3);
     return { overall, leadershipIndex: li, coreIndex: ci, readinessIndex: ri };
   };
@@ -418,9 +418,9 @@ function calculateResistanceIndicesByWorkExperience() {
       if (["8", "9", "10", "11"].includes(qId))  readinessSum += val;
     });
 
-    const li = toIndex(leadershipSum / n, 15);
-    const ci = toIndex(coreSum / n, 15);
-    const ri = toIndex(readinessSum / n, 20);
+    const li = toIndex(leadershipSum / n, 9);
+    const ci = toIndex(coreSum / n, 10);
+    const ri = toIndex(readinessSum / n, 11);
     const overall = Math.round((li + ci + ri) / 3);
     return { n, leadership: li, core: ci, readiness: ri, overall };
   };
