@@ -71,7 +71,7 @@ const translations = {
       },
       methodNote: {
         title: "Metodologik izoh",
-        body1: "Qarshilik indeksi haqiqiy javob variantlari asosida normallashtirilib hisoblandi: Rahbariyat (Q5–Q7, maks 9), Asosiy (Q3, Q4, Q12, maks 10), Tayyorgarlik (Q8–Q11, maks 11). Har bir guruh yig'indi ballari maksimal mumkin bo'lgan ballga bo'linib, 0–100 indeks shakliga keltirildi.",
+        body1: "Qarshilik indeksi 3 ballik Likert shkalasi asosida hisoblandi: Rahbariyat (Q5, Q6, Q7), Asosiy (Q8, Q9, Q10), Tayyorgarlik (Q11, Q12, Q13). Formula: ((o'rtacha javob - 1) / 2) × 100.",
         body2: "Yuqori indeks qiymati sun’iy intellektni joriy etishga nisbatan kuchliroq tashkiliy va psixologik qarshilikni anglatadi."
       },
       byExperience: {
@@ -170,7 +170,7 @@ const translations = {
       },
       methodNote: {
         title: "Methodological Note",
-        body1: "The Resistance Index is normalized against the actual answer-option maxima: Leadership (Q5–Q7, max 9), Core (Q3, Q4, Q12, max 10), Readiness (Q8–Q11, max 11). Each group total is divided by its maximum possible score and scaled to 0–100.",
+        body1: "The Resistance Index uses a 3-point Likert scale: Leadership (Q5, Q6, Q7), Core (Q8, Q9, Q10), Readiness (Q11, Q12, Q13). Formula: ((mean answer – 1) / 2) × 100.",
         body2: "Higher index values indicate stronger organizational and psychological resistance to AI adoption."
       },
       byExperience: {
@@ -250,107 +250,77 @@ function indexColor(value) {
   if (value <= 80) return "#c62828";
   return "#8e0000";
 }
-function calculateResistanceIndices() {
-  if (!allResponses || allResponses.length === 0) return null;
+/* Shared resistance formula: ((avg_answer_id - 1) / 2) × 100
+   Leadership : Q5, Q6, Q7
+   Core       : Q8, Q9, Q10
+   Readiness  : Q11, Q12, Q13
+*/
+const RESISTANCE_GROUPS = {
+  leadership: ["5", "6", "7"],
+  core:       ["8", "9", "10"],
+  readiness:  ["11", "12", "13"]
+};
 
-  let leadershipSum = 0;
-  let coreSum = 0;
-  let readinessSum = 0;
+function resistanceIndex(sum, count) {
+  if (!count) return null;
+  return Math.min(100, Math.max(0, Math.round(((sum / count) - 1) / 2 * 100)));
+}
 
-  const respondentSet = new Set();
-  allResponses.forEach(r => {
-    respondentSet.add(r.user_id);
-  });
-  const respondentCount = respondentSet.size || 1;
-
-  allResponses.forEach(r => {
+function calcResistanceFromRows(rows) {
+  let lSum = 0, lCnt = 0, cSum = 0, cCnt = 0, rSum = 0, rCnt = 0;
+  rows.forEach(r => {
     const qId = String(r.question_id);
     const answer = r.answer;
-
     if (!answer || !answer.id) return;
-
     const val = parseInt(answer.id, 10);
-    if (isNaN(val)) return;
-
-    if (["5", "6", "7"].includes(qId)) {
-      leadershipSum += val;
-    }
-    if (["3", "4", "12"].includes(qId)) {
-      coreSum += val;
-    }
-    if (["8", "9", "10", "11"].includes(qId)) {
-      readinessSum += val;
-    }
+    if (isNaN(val) || val < 1) return;
+    if (RESISTANCE_GROUPS.leadership.includes(qId)) { lSum += val; lCnt++; }
+    if (RESISTANCE_GROUPS.core.includes(qId))       { cSum += val; cCnt++; }
+    if (RESISTANCE_GROUPS.readiness.includes(qId))  { rSum += val; rCnt++; }
   });
+  const li = resistanceIndex(lSum, lCnt);
+  const ci = resistanceIndex(cSum, cCnt);
+  const ri = resistanceIndex(rSum, rCnt);
+  const parts = [li, ci, ri].filter(x => x != null);
+  const overall = parts.length ? Math.round(parts.reduce((a, b) => a + b, 0) / parts.length) : null;
+  return { leadershipIndex: li, coreIndex: ci, readinessIndex: ri, overall };
+}
 
-  const leadershipAvg = leadershipSum / respondentCount;
-  const coreAvg = coreSum / respondentCount;
-  const readinessAvg = readinessSum / respondentCount;
-
-  return {
-    leadershipIndex: toIndex(leadershipAvg, 9),
-    coreIndex: toIndex(coreAvg, 10),
-    readinessIndex: toIndex(readinessAvg, 11)
-  };
+function calculateResistanceIndices() {
+  if (!allResponses || allResponses.length === 0) return null;
+  const result = calcResistanceFromRows(allResponses);
+  if (result.overall == null) return null;
+  return result;
 }
 
 function calculateResistanceIndicesByPosition() {
   if (!allResponses || allResponses.length === 0) return null;
 
-  const submissionQ16 = new Map();
+  const submissionQ1b = new Map();
   allResponses.forEach(r => {
     if (String(r.question_id) === "1b" && r.answer && r.answer.id) {
       const key = `${r.user_id}::${r.timestamp}`;
-      submissionQ16.set(key, String(r.answer.id));
+      submissionQ1b.set(key, String(r.answer.id));
     }
   });
 
   const calcForGroup = (submissionKeys) => {
-    const n = submissionKeys.length;
-    if (n === 0) return { overall: null };
-
-    let leadershipSum = 0;
-    let coreSum = 0;
-    let readinessSum = 0;
+    if (submissionKeys.length === 0) return { overall: null };
     const keysSet = new Set(submissionKeys);
-
-    allResponses.forEach(r => {
-      const key = `${r.user_id}::${r.timestamp}`;
-      if (!keysSet.has(key)) return;
-
-      const qId = String(r.question_id);
-      const answer = r.answer;
-      if (!answer || !answer.id) return;
-
-      const val = parseInt(answer.id, 10);
-      if (isNaN(val)) return;
-
-      if (["5", "6", "7"].includes(qId)) leadershipSum += val;
-      if (["3", "4", "12"].includes(qId)) coreSum += val;
-      if (["8", "9", "10", "11"].includes(qId)) readinessSum += val;
-    });
-
-    const leadershipAvg = leadershipSum / n;
-    const coreAvg = coreSum / n;
-    const readinessAvg = readinessSum / n;
-
-    const li = toIndex(leadershipAvg, 9);
-    const ci = toIndex(coreAvg, 10);
-    const ri = toIndex(readinessAvg, 11);
-    const overall = Math.round((li + ci + ri) / 3);
-    return { overall, leadershipIndex: li, coreIndex: ci, readinessIndex: ri };
+    const rows = allResponses.filter(r => keysSet.has(`${r.user_id}::${r.timestamp}`));
+    return calcResistanceFromRows(rows);
   };
 
   const byLevel = { "1": [], "2": [], "3": [], "4": [] };
-  submissionQ16.forEach((q16Id, key) => {
-    if (byLevel[q16Id]) byLevel[q16Id].push(key);
+  submissionQ1b.forEach((q1bId, key) => {
+    if (byLevel[q1bId]) byLevel[q1bId].push(key);
   });
 
   return {
-    yuqori: calcForGroup(byLevel["1"]),
-    orta: calcForGroup(byLevel["2"]),
-    quyi: calcForGroup(byLevel["3"]),
-    mutaxassis: calcForGroup(byLevel["4"])
+    yuqori:      calcForGroup(byLevel["1"]),
+    orta:        calcForGroup(byLevel["2"]),
+    quyi:        calcForGroup(byLevel["3"]),
+    mutaxassis:  calcForGroup(byLevel["4"])
   };
 }
 
@@ -396,33 +366,13 @@ function calculateResistanceIndicesByWorkExperience() {
     byGroup[q2id].push(submissionKey);
   });
 
-  // Asosiy indeks bilan bir xil: toIndex(avg, max) — 5 ballik Likert
   const calcForGroup = (submissionKeys) => {
     const n = submissionKeys.length;
     if (n === 0) return { overall: null, leadership: null, core: null, readiness: null, n: 0 };
-
-    let leadershipSum = 0, coreSum = 0, readinessSum = 0;
     const keysSet = new Set(submissionKeys);
-
-    allResponses.forEach((r) => {
-      const key = `${r.user_id}::${r.timestamp}`;
-      if (!keysSet.has(key)) return;
-      const qId = String(r.question_id);
-      const answer = r.answer;
-      if (!answer || !answer.id) return;
-      const val = parseInt(answer.id, 10);
-      if (isNaN(val)) return;
-
-      if (["5", "6", "7"].includes(qId))        leadershipSum += val;
-      if (["3", "4", "12"].includes(qId))        coreSum += val;
-      if (["8", "9", "10", "11"].includes(qId))  readinessSum += val;
-    });
-
-    const li = toIndex(leadershipSum / n, 9);
-    const ci = toIndex(coreSum / n, 10);
-    const ri = toIndex(readinessSum / n, 11);
-    const overall = Math.round((li + ci + ri) / 3);
-    return { n, leadership: li, core: ci, readiness: ri, overall };
+    const rows = allResponses.filter(r => keysSet.has(`${r.user_id}::${r.timestamp}`));
+    const res = calcResistanceFromRows(rows);
+    return { n, leadership: res.leadershipIndex, core: res.coreIndex, readiness: res.readinessIndex, overall: res.overall };
   };
 
   const out = empty();
@@ -769,10 +719,7 @@ function updateDashboard() {
   const t = translations[lang] || translations.uz;
 
   if (indices) {
-    const { leadershipIndex, coreIndex, readinessIndex } = indices;
-    const overallIndex = Math.round(
-      (leadershipIndex + coreIndex + readinessIndex) / 3
-    );
+    const { leadershipIndex, coreIndex, readinessIndex, overall: overallIndex } = indices;
 
     bind("overallIndex", overallIndex, "overallLabel");
 
