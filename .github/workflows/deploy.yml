@@ -23,7 +23,7 @@ jobs:
         run: |
           cat > config.js << 'EOF'
           const CONFIG = {
-              GITHUB_TOKEN: '${{ secrets.TOKEN_GITHUB }}',
+              GITHUB_TOKEN: '${{ secrets.TOKEN_GITHUB2 }}',
               GIST_ID: 'd88f1ebc50c5d37c857ee5961d6dba5c',
               API_BASE: null
           };
